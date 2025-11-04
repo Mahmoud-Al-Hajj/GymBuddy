@@ -1,4 +1,5 @@
-import { TextInput as RNTextInput, Text, View } from "react-native";
+import { TextInput as RNTextInput, StyleSheet, Text, View } from "react-native";
+import { Colors } from "../constants/colors";
 
 function TextInput({
   label,
@@ -6,13 +7,18 @@ function TextInput({
   onChangeText,
   error,
   placeholder,
+  color = Colors.primary,
   ...props
 }) {
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
       <RNTextInput
-        style={[styles.input, error && styles.inputError]}
+        style={[
+          styles.input,
+          { borderColor: color },
+          error && styles.inputError,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -25,19 +31,20 @@ function TextInput({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   label: {
-    marginBottom: 4,
-    fontSize: 14,
-    color: "#333",
+    marginBottom: 8,
+    fontSize: 16,
+    color: Colors.primary,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    minHeight: 56,
   },
   inputError: {
     borderColor: "red",

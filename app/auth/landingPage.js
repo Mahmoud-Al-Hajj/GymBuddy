@@ -1,9 +1,16 @@
 import { useRouter } from "expo-router";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import Button from "../../components/Button.js";
-
+import { RetroSportDemo, Ultimate, useGymBold } from "../../constants/fonts.js";
 function LandingPage() {
   const router = useRouter();
+  const GymBold = useGymBold();
+  const UltimateLoaded = Ultimate();
+  const RetroSportDemoLoaded = RetroSportDemo();
+
+  if (!GymBold || !UltimateLoaded) {
+    return null;
+  }
 
   const NavigateToLogin = () => {
     router.push("/auth/login");
@@ -22,7 +29,7 @@ function LandingPage() {
           />
           <ImageBackground
             source={require("../../assets/images/22801938895(1).png")}
-            style={{ width: 200, height: 200, position: "absolute", top: 280 }}
+            style={{ width: 200, height: 200, position: "absolute", top: 275 }}
           />
           <Text style={styles.BelowText}>GymBuddy</Text>
           <Button
@@ -60,14 +67,15 @@ const styles = StyleSheet.create({
     filter: "brightness(152%)",
   },
   BelowText: {
+    //make it wider
     color: "white",
     fontSize: 53,
-    fontWeight: "bold",
     position: "absolute",
-    bottom: 380,
+    bottom: 395,
     left: 0,
     right: 0,
     textAlign: "center",
+    fontFamily: "GymBold",
   },
   buttonStyle: {
     position: "absolute",
@@ -75,15 +83,15 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     alignSelf: "center",
-    paddingVertical: 17,
+    paddingVertical: 16,
     paddingHorizontal: 40,
     borderRadius: 10,
   },
   textStyle: {
     fontSize: 18,
-    fontWeight: "bold",
     textAlign: "center",
     color: "black",
+    fontFamily: "RetroSportDemo",
   },
 });
 

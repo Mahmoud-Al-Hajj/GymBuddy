@@ -20,7 +20,7 @@ function Button({
   const finalTextStyle = {
     color: isPrimary ? "white" : Colors.primary,
     fontSize: 16,
-    fontWeight: "600",
+    ...(textStyle?.fontFamily ? {} : { fontWeight: "600" }), // Only add fontWeight if no custom font
     ...textStyle,
   };
 
