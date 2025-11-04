@@ -7,7 +7,7 @@ function LandingPage() {
   const GymBold = useGymBold();
   const UltimateLoaded = Ultimate();
   const RetroSportDemoLoaded = RetroSportDemo();
-
+  n;
   if (!GymBold || !UltimateLoaded) {
     return null;
   }

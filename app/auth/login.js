@@ -1,6 +1,15 @@
+import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useState } from "react";
-import { Alert, ImageBackground, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as Yup from "yup";
 import Button from "../../components/Button.js";
 import TextInput from "../../components/TextInput.js";
@@ -16,6 +25,7 @@ const loginValidationSchema = Yup.object().shape({
 });
 
 function Login() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +49,13 @@ function Login() {
     >
       <View style={styles.overlay} />
       <View style={styles.content}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
+        </TouchableOpacity>
+
         <View style={styles.TextContainer}>
           <Text style={styles.title}>
             Welcome to <Text style={{ color: Colors.primary }}>GymBuddy</Text>
@@ -54,7 +71,7 @@ function Login() {
           onSubmit={handleLogin}
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
-            <View>
+            <View style={styles.formContainer}>
               <TextInput
                 label="Email"
                 placeholder="Enter your email"
@@ -75,6 +92,7 @@ function Login() {
                 onChangeText={handleChange("password")}
                 onBlur={handleBlur("password")}
                 error={errors.password}
+                secureTextEntry
                 color={Colors.primary}
               />
 
@@ -115,6 +133,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     color: "white",
   },
+  backButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    padding: 8,
+  },
   title: {
     fontSize: 32,
     fontWeight: "bold",
@@ -125,6 +150,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "white",
     marginBottom: 30,
+  },
+  formContainer: {
+    marginTop: 20,
   },
   button: {
     marginTop: 20,
