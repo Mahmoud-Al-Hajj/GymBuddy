@@ -1,5 +1,21 @@
+import { createStackNavigator } from "@react-navigation/stack";
 import LandingPage from "./auth/landingPage";
+import Login from "./auth/login";
+//import HomePage from "./HomePage";
+
+const Stack = createStackNavigator();
 
 export default function Index() {
-  return <LandingPage />;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: "fade_from_bottom",
+      }}
+    >
+      <Stack.Screen name="Landing" component={LandingPage} />
+      <Stack.Screen name="Login" component={Login} />
+      {/* <Stack.Screen name="Home" component={HomePage} /> */}
+    </Stack.Navigator>
+  );
 }

@@ -1,19 +1,17 @@
-import { useRouter } from "expo-router";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import Button from "../../components/Button.js";
-import { RetroSportDemo, Ultimate, useGymBold } from "../../constants/fonts.js";
-function LandingPage() {
-  const router = useRouter();
+import { Ultimate, useGymBold } from "../../constants/fonts.js";
+
+function LandingPage({ navigation }) {
   const GymBold = useGymBold();
   const UltimateLoaded = Ultimate();
-  const RetroSportDemoLoaded = RetroSportDemo();
-  n;
+
   if (!GymBold || !UltimateLoaded) {
     return null;
   }
 
   const NavigateToLogin = () => {
-    router.push("/auth/login");
+    navigation.navigate("Login");
   };
 
   return (

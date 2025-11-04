@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { Formik } from "formik";
 import { useState } from "react";
 import {
@@ -24,19 +24,20 @@ const loginValidationSchema = Yup.object().shape({
     .required("Password is required"),
 });
 
-function Login() {
-  const router = useRouter();
+function Login({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (values) => {
+  const handleLogin = async (values) => {
     if (
       values.email === "test@gmail.com" &&
       values.password === "password123"
     ) {
-      Alert.alert("Success", "Login successful!");
-      // Later: router.push('/home')
+      const mockToken = "1234567890abcdef";
+      await SecureStore.setItemAsync("userToken", mockToken);
+      await SecureStore.setItemAsync("userEmail", values.email);
+      //navigation.navigate("Home");
     } else {
       Alert.alert("Error", "Invalid email or password");
     }
