@@ -37,7 +37,18 @@ function Login({ navigation }) {
       const mockToken = "1234567890abcdef";
       await SecureStore.setItemAsync("userToken", mockToken);
       await SecureStore.setItemAsync("userEmail", values.email);
-      //navigation.navigate("Home");
+
+      const userGender = await SecureStore.getItemAsync("userGender");
+      const userAge = await SecureStore.getItemAsync("userAge");
+      const userWeight = await SecureStore.getItemAsync("userWeight");
+
+      if (userGender && userAge && userWeight) {
+        navigation.navigate("Home");
+      } else {
+        navigation.navigate("Onboarding");
+      }
+
+      Alert.alert("Success", "Login successful!");
     } else {
       Alert.alert("Error", "Invalid email or password");
     }
@@ -61,8 +72,9 @@ function Login({ navigation }) {
           <Text style={styles.title}>
             Welcome to <Text style={{ color: Colors.primary }}>GymBuddy</Text>
           </Text>
+          <Text style={styles.tagline}>Your Personal Fitness Companion</Text>
           <Text style={styles.subtitle}>
-            Hello there, please Login to continue
+            Track workouts • Build habits • Achieve goals
           </Text>
         </View>
 
@@ -146,10 +158,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     color: "white",
+    marginBottom: 12,
+  },
+  tagline: {
+    fontSize: 20,
+    fontWeight: "600",
+    textAlign: "center",
+    color: Colors.primary,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   subtitle: {
-    fontSize: 18,
-    color: "white",
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
     marginBottom: 30,
   },
   formContainer: {
@@ -164,7 +186,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   TextContainer: {
-    marginBottom: 80,
+    marginBottom: 55,
   },
   textStyle: {
     fontSize: 17,
