@@ -42,7 +42,10 @@ function HomePage({ navigation }) {
       const userWeight = await SecureStore.getItemAsync("userWeight");
 
       if (!userGender || !userAge || !userWeight) {
-        navigation.navigate("Onboarding");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Onboarding" }],
+        });
       }
     } catch (error) {
       console.error("Error checking onboarding status:", error);

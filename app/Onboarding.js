@@ -26,14 +26,17 @@ function Onboarding({ navigation }) {
     if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Save user data and navigate to home
       try {
         await SecureStore.setItemAsync("userGender", gender);
         await SecureStore.setItemAsync("userAge", age.toString());
         await SecureStore.setItemAsync("userWeight", weight.toString());
 
         alert("Profile setup complete!");
-        navigation.navigate("Home");
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
       } catch (error) {
         console.error("Error saving profile:", error);
       }

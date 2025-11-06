@@ -43,9 +43,15 @@ function Login({ navigation }) {
       const userWeight = await SecureStore.getItemAsync("userWeight");
 
       if (userGender && userAge && userWeight) {
-        navigation.navigate("Home");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
       } else {
-        navigation.navigate("Onboarding");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Onboarding" }],
+        });
       }
 
       Alert.alert("Success", "Login successful!");
