@@ -1,7 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
@@ -17,8 +16,7 @@ import {
 } from "react-native";
 import { Colors } from "../constants/colors.js";
 
-function HomePage() {
-  const router = useRouter();
+function HomePage({ navigation }) {
   const [workouts, setWorkouts] = useState([]);
   const [userName, setUserName] = useState("");
   const [showAddWorkout, setShowAddWorkout] = useState(false);
@@ -44,7 +42,7 @@ function HomePage() {
       const userWeight = await SecureStore.getItemAsync("userWeight");
 
       if (!userGender || !userAge || !userWeight) {
-        router.push("/Onboarding");
+        navigation.navigate("Onboarding");
       }
     } catch (error) {
       console.error("Error checking onboarding status:", error);
@@ -215,7 +213,20 @@ function HomePage() {
           }
           return workout;
         });
-        saveWorkouts(updatedWorkouts);
+
+        // Save workouts first
+        await saveWorkouts(updatedWorkouts);
+
+        // Update selected workout to trigger re-render
+        const updatedSelectedWorkout = updatedWorkouts.find(
+          (w) => w.id === workoutId
+        );
+        setSelectedWorkout(updatedSelectedWorkout);
+
+        // Force a small delay to ensure state updates
+        setTimeout(() => {
+          setSelectedWorkout((prev) => ({ ...prev }));
+        }, 100);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to add photo");
@@ -241,16 +252,6 @@ function HomePage() {
     );
   };
 
-  const handleLogout = async () => {
-    try {
-      await SecureStore.deleteItemAsync("userToken");
-      await SecureStore.deleteItemAsync("userEmail");
-      router.push("/login");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -267,8 +268,11 @@ function HomePage() {
           <Text style={styles.greeting}>Hello, {userName}!</Text>
           <Text style={styles.subGreeting}>Ready to crush your workout?</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <MaterialIcons name="logout" size={24} color="#fff" />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.profileButton}
+        >
+          <MaterialIcons name="person" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -495,7 +499,6 @@ function HomePage() {
             </View>
 
             <ScrollView style={styles.modalBody}>
-              {/* Exercises */}
               <Text style={styles.sectionHeader}>Exercises</Text>
               {selectedWorkout?.exercises.map((exercise) => (
                 <View key={exercise.id} style={styles.exerciseCard}>
@@ -545,7 +548,7 @@ function HomePage() {
               ))}
 
               <View style={styles.addExerciseForm}>
-                <Text style={styles.inputLabel}>Add Exercise</Text>
+                <Text style={styles.addExerciseTitle}>Add Exercise</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Exercise name"
@@ -553,7 +556,7 @@ function HomePage() {
                   value={exerciseName}
                   onChangeText={setExerciseName}
                 />
-                <View style={styles.row}>
+                <View style={[styles.row, { marginTop: 12 }]}>
                   <TextInput
                     style={[styles.input, styles.smallInput]}
                     placeholder="Sets"
@@ -652,6 +655,15 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     padding: 8,
+  },
+  profileButton: {
+    padding: 8,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   statsContainer: {
     flexDirection: "row",
@@ -798,7 +810,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
     marginBottom: 8,
-    marginTop: 16,
+    marginTop: 12,
   },
   input: {
     backgroundColor: "#2a2a2a",
@@ -834,8 +846,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
-    marginTop: 24,
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 16,
   },
   exerciseCard: {
     flexDirection: "row",
@@ -843,7 +855,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2a2a2a",
     borderRadius: 12,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   exerciseCheckbox: {
     marginRight: 12,
@@ -869,10 +881,16 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   addExerciseForm: {
-    marginTop: 16,
-    paddingTop: 16,
+    marginTop: 32,
+    paddingTop: 24,
     borderTopWidth: 1,
     borderTopColor: "#333",
+  },
+  addExerciseTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 16,
   },
   addExerciseButton: {
     flexDirection: "row",
@@ -893,7 +911,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2a2a2a",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
+    marginBottom: 12,
     borderLeftWidth: 3,
     borderLeftColor: "#FFD700",
   },
