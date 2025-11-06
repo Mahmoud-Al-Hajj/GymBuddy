@@ -1,4 +1,3 @@
-import { Colors } from "@/constants/colors.js";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import Button from "../../components/Button.js";
 import { Ultimate, useGymBold } from "../../constants/fonts.js";
@@ -13,10 +12,6 @@ function LandingPage({ navigation }) {
 
   const NavigateToLogin = () => {
     navigation.navigate("Login");
-  };
-  //remove later
-  const NavigateToHome = () => {
-    navigation.navigate("Home2");
   };
 
   return (
@@ -39,21 +34,6 @@ function LandingPage({ navigation }) {
             label="Get Started"
             onPress={NavigateToLogin}
             style={styles.buttonStyle}
-            textStyle={styles.textStyle}
-          />
-          <Button
-            label="Test"
-            onPress={NavigateToHome}
-            style={{
-              width: 200,
-              height: 50,
-              backgroundColor: Colors.secondary,
-              borderRadius: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              position: "absolute",
-              bottom: 50,
-            }}
             textStyle={styles.textStyle}
           />
         </View>
@@ -85,7 +65,6 @@ const styles = StyleSheet.create({
     filter: "brightness(152%)",
   },
   BelowText: {
-    //make it wider
     color: "white",
     fontSize: 53,
     position: "absolute",
