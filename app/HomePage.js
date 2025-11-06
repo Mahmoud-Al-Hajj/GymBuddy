@@ -25,7 +25,6 @@ function HomePage() {
   const [showWorkoutDetail, setShowWorkoutDetail] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
 
-  // Add Workout Form States
   const [workoutName, setWorkoutName] = useState("");
   const [exerciseName, setExerciseName] = useState("");
   const [sets, setSets] = useState("");
@@ -44,7 +43,6 @@ function HomePage() {
       const userAge = await SecureStore.getItemAsync("userAge");
       const userWeight = await SecureStore.getItemAsync("userWeight");
 
-      // If onboarding not completed, redirect to onboarding
       if (!userGender || !userAge || !userWeight) {
         router.push("/Onboarding");
       }
@@ -188,7 +186,7 @@ function HomePage() {
       return workout;
     });
     saveWorkouts(updatedWorkouts);
-    Alert.alert("🎉 Personal Best!", "New PR logged successfully!");
+    Alert.alert("Personal Best!", "New PR logged successfully!");
   };
 
   const handleAddPhoto = async (workoutId) => {
@@ -264,7 +262,6 @@ function HomePage() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Hello, {userName}!</Text>
@@ -275,7 +272,6 @@ function HomePage() {
         </TouchableOpacity>
       </View>
 
-      {/* Stats Cards */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <MaterialCommunityIcons
@@ -305,7 +301,6 @@ function HomePage() {
         </View>
       </View>
 
-      {/* Workouts List */}
       <View style={styles.workoutsHeader}>
         <Text style={styles.sectionTitle}>My Workouts</Text>
         <TouchableOpacity
@@ -381,7 +376,6 @@ function HomePage() {
         )}
       </ScrollView>
 
-      {/* Add Workout Modal */}
       <Modal
         visible={showAddWorkout}
         animationType="slide"
@@ -462,7 +456,6 @@ function HomePage() {
         </View>
       </Modal>
 
-      {/* Workout Detail Modal */}
       <Modal
         visible={showWorkoutDetail}
         animationType="slide"
@@ -551,7 +544,6 @@ function HomePage() {
                 </View>
               ))}
 
-              {/* Add Exercise Form */}
               <View style={styles.addExerciseForm}>
                 <Text style={styles.inputLabel}>Add Exercise</Text>
                 <TextInput
@@ -596,7 +588,6 @@ function HomePage() {
                 </TouchableOpacity>
               </View>
 
-              {/* Personal Bests */}
               {selectedWorkout?.personalBests?.length > 0 && (
                 <>
                   <Text style={styles.sectionHeader}>Personal Bests 🏆</Text>
@@ -612,7 +603,6 @@ function HomePage() {
                 </>
               )}
 
-              {/* Progress Photos */}
               {selectedWorkout?.photos?.length > 0 && (
                 <>
                   <Text style={styles.sectionHeader}>Progress Photos</Text>
