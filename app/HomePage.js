@@ -221,7 +221,6 @@ function HomePage({ navigation }) {
           return workout;
         });
 
-        // Save workouts first
         await saveWorkouts(updatedWorkouts);
 
         // Find the workout we just updated and show it in the modal
