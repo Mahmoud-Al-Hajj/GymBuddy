@@ -181,6 +181,10 @@ function ProfilePage({ navigation }) {
           try {
             await SecureStore.deleteItemAsync("userToken");
             await SecureStore.deleteItemAsync("userEmail");
+            await SecureStore.deleteItemAsync("userGender");
+            await SecureStore.deleteItemAsync("userAge");
+            await SecureStore.deleteItemAsync("userWeight");
+
             navigation.navigate("Login");
           } catch (error) {
             console.error("Error logging out:", error);
@@ -242,7 +246,9 @@ function ProfilePage({ navigation }) {
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               <MaterialCommunityIcons
-                name="account"
+                name={
+                  gender === "male" ? "face-man-profile" : "face-woman-profile"
+                }
                 size={48}
                 color={Colors.primary}
               />
