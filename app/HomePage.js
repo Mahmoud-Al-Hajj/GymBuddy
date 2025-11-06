@@ -189,8 +189,15 @@ function HomePage({ navigation }) {
 
   const handleAddPhoto = async (workoutId) => {
     try {
+      const { granted } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!granted) {
+        Alert.alert("Error", "Media library permission denied");
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -217,16 +224,12 @@ function HomePage({ navigation }) {
         // Save workouts first
         await saveWorkouts(updatedWorkouts);
 
-        // Update selected workout to trigger re-render
+        // Find the workout we just updated and show it in the modal
         const updatedSelectedWorkout = updatedWorkouts.find(
-          (w) => w.id === workoutId
+          (workout) => workout.id === workoutId
         );
-        setSelectedWorkout(updatedSelectedWorkout);
 
-        // Force a small delay to ensure state updates
-        setTimeout(() => {
-          setSelectedWorkout((prev) => ({ ...prev }));
-        }, 100);
+        setSelectedWorkout(updatedSelectedWorkout);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to add photo");
