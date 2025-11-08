@@ -396,35 +396,6 @@ function ProfilePage({ navigation }) {
           </View>
         )}
 
-        {/* Settings Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-
-          <TouchableOpacity style={styles.settingRow}>
-            <View style={styles.infoLeft}>
-              <MaterialIcons name="notifications" size={24} color="#888" />
-              <Text style={styles.settingLabel}>Notifications</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.settingRow}>
-            <View style={styles.infoLeft}>
-              <MaterialIcons name="privacy-tip" size={24} color="#888" />
-              <Text style={styles.settingLabel}>Privacy</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.settingRow}>
-            <View style={styles.infoLeft}>
-              <MaterialIcons name="help" size={24} color="#888" />
-              <Text style={styles.settingLabel}>Help & Support</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
-
         {/* Danger Zone */}
         <View style={styles.dangerSection}>
           <TouchableOpacity
@@ -695,19 +666,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#888",
   },
-  settingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-  },
-  settingLabel: {
-    fontSize: 16,
-    color: "#fff",
-  },
+
   dangerSection: {
     marginTop: 8,
     gap: 12,

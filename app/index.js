@@ -4,6 +4,7 @@ import Login from "./auth/login";
 import HomePage from "./HomePage";
 import Onboarding from "./Onboarding";
 import Profile from "./ProfileScreen";
+import SettingsPage from "./SettingsPage";
 const Stack = createStackNavigator();
 
 export default function Index() {
@@ -19,6 +20,7 @@ export default function Index() {
       <Stack.Screen name="Onboarding" component={Onboarding} />
       <Stack.Screen name="Home" component={HomePage} />
       <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="Settings" component={SettingsPage} />
     </Stack.Navigator>
   );
 }

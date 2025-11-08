@@ -274,7 +274,7 @@ function HomePage({ navigation }) {
           <Text style={styles.subGreeting}>Ready to crush your workout?</Text>
         </View>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => navigation.navigate("Settings")}
           style={styles.profileButton}
         >
           <MaterialIcons name="person" size={24} color="#fff" />
