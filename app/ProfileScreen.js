@@ -237,7 +237,12 @@ function ProfilePage({ navigation }) {
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Settings")}
+          style={styles.settingsButton}
+        >
+          <MaterialIcons name="settings" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

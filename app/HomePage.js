@@ -2,7 +2,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -28,12 +28,44 @@ function HomePage({ navigation }) {
   const [sets, setSets] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const [weightUnit, setWeightUnit] = useState("kg");
 
   useEffect(() => {
     checkOnboardingStatus();
     loadUserData();
     loadWorkouts();
+    loadDefaultValues();
   }, []);
+
+  const loadDefaultValues = async () => {
+    try {
+      const defaultSets = await AsyncStorage.getItem("defaultSets");
+      const defaultReps = await AsyncStorage.getItem("defaultReps");
+      const savedWeightUnit = await AsyncStorage.getItem("weightUnit");
+
+      if (defaultSets) setSets(defaultSets);
+      if (defaultReps) setReps(defaultReps);
+      if (savedWeightUnit) setWeightUnit(savedWeightUnit);
+    } catch (error) {
+      console.error("Error loading default values:", error);
+    }
+  };
+
+  const convertWeight = (weightValue, fromUnit, toUnit) => {
+    if (fromUnit === toUnit) return weightValue;
+    if (fromUnit === "kg" && toUnit === "lbs") {
+      return (weightValue * 2.2).toFixed(1);
+    }
+    if (fromUnit === "lbs" && toUnit === "kg") {
+      return (weightValue / 2.2).toFixed(1);
+    }
+    return weightValue;
+  };
+
+  const formatWeight = (weightValue) => {
+    if (!weightValue || weightValue === 0) return "";
+    return `${weightValue} ${weightUnit}`;
+  };
 
   const checkOnboardingStatus = async () => {
     try {
@@ -274,7 +306,7 @@ function HomePage({ navigation }) {
           <Text style={styles.subGreeting}>Ready to crush your workout?</Text>
         </View>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Settings")}
+          onPress={() => navigation.navigate("Profile")}
           style={styles.profileButton}
         >
           <MaterialIcons name="person" size={24} color="#fff" />
@@ -314,7 +346,11 @@ function HomePage({ navigation }) {
         <Text style={styles.sectionTitle}>My Workouts</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setShowAddWorkout(true)}
+          onPress={() => {
+            // Reload settings before opening modal
+            loadDefaultValues();
+            setShowAddWorkout(true);
+          }}
         >
           <MaterialIcons name="add" size={24} color="#000" />
         </TouchableOpacity>
@@ -338,6 +374,8 @@ function HomePage({ navigation }) {
               key={workout.id}
               style={styles.workoutCard}
               onPress={() => {
+                // Reload settings before opening workout detail
+                loadDefaultValues();
                 setSelectedWorkout(workout);
                 setShowWorkoutDetail(true);
               }}
@@ -534,7 +572,8 @@ function HomePage({ navigation }) {
                     </Text>
                     <Text style={styles.exerciseDetails}>
                       {exercise.sets} sets × {exercise.reps} reps
-                      {exercise.weight > 0 && ` • ${exercise.weight} kg`}
+                      {exercise.weight > 0 &&
+                        ` • ${exercise.weight} ${weightUnit}`}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -603,7 +642,7 @@ function HomePage({ navigation }) {
                     <View key={pb.id} style={styles.pbCard}>
                       <Text style={styles.pbExercise}>{pb.exerciseName}</Text>
                       <Text style={styles.pbDetails}>
-                        {pb.weight} kg × {pb.reps} reps
+                        {pb.weight} {weightUnit} × {pb.reps} reps
                       </Text>
                       <Text style={styles.pbDate}>{formatDate(pb.date)}</Text>
                     </View>

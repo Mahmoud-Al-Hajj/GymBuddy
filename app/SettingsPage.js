@@ -1,93 +1,183 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Colors } from "../constants/colors.js";
 
 function SettingsPage({ navigation }) {
-  // Settings states
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [weightUnit, setWeightUnit] = useState("kg"); // "kg" or "lbs"
+  const [workoutReminders, setWorkoutReminders] = useState(false);
+  const [weightUnit, setWeightUnit] = useState("kg");
+  const [defaultSets, setDefaultSets] = useState("3");
+  const [defaultReps, setDefaultReps] = useState("12");
+  const [restTimer, setRestTimer] = useState("60");
+
+  const [showSetsModal, setShowSetsModal] = useState(false);
+  const [showRepsModal, setShowRepsModal] = useState(false);
+  const [showRestTimerModal, setShowRestTimerModal] = useState(false);
+  const [tempValue, setTempValue] = useState("");
 
   useEffect(() => {
     loadSettings();
   }, []);
 
-  // Load saved settings from AsyncStorage
   const loadSettings = async () => {
     try {
-      const savedNotifications = await AsyncStorage.getItem(
-        "notificationsEnabled"
-      );
-      const savedWeightUnit = await AsyncStorage.getItem("weightUnit");
+      const settings = {
+        notifications: await AsyncStorage.getItem("notificationsEnabled"),
+        workoutReminders: await AsyncStorage.getItem("workoutReminders"),
+        weightUnit: await AsyncStorage.getItem("weightUnit"),
+        defaultSets: await AsyncStorage.getItem("defaultSets"),
+        defaultReps: await AsyncStorage.getItem("defaultReps"),
+        restTimer: await AsyncStorage.getItem("restTimer"),
+      };
 
-      if (savedNotifications !== null) {
-        setNotificationsEnabled(JSON.parse(savedNotifications));
+      if (settings.notifications !== null) {
+        setNotificationsEnabled(JSON.parse(settings.notifications));
       }
-      if (savedWeightUnit !== null) {
-        setWeightUnit(savedWeightUnit);
+      if (settings.workoutReminders !== null) {
+        setWorkoutReminders(JSON.parse(settings.workoutReminders));
+      }
+      if (settings.weightUnit !== null) {
+        setWeightUnit(settings.weightUnit);
+      }
+      if (settings.defaultSets !== null) {
+        setDefaultSets(settings.defaultSets);
+      }
+      if (settings.defaultReps !== null) {
+        setDefaultReps(settings.defaultReps);
+      }
+      if (settings.restTimer !== null) {
+        setRestTimer(settings.restTimer);
       }
     } catch (error) {
       console.error("Error loading settings:", error);
     }
   };
 
-  // Toggle notifications
-  const toggleNotifications = async (value) => {
+  const saveSetting = async (key, value) => {
     try {
-      setNotificationsEnabled(value);
-      await AsyncStorage.setItem("notificationsEnabled", JSON.stringify(value));
-
-      if (value) {
-        Alert.alert(
-          "Notifications Enabled",
-          "You'll receive workout reminders!"
-        );
-      }
-    } catch (error) {
-      console.error("Error saving notification setting:", error);
-    }
-  };
-
-  // Toggle weight unit
-  const toggleWeightUnit = async () => {
-    try {
-      const newUnit = weightUnit === "kg" ? "lbs" : "kg";
-      setWeightUnit(newUnit);
-      await AsyncStorage.setItem("weightUnit", newUnit);
-
-      Alert.alert(
-        "Weight Unit Changed",
-        `Weight will now be displayed in ${newUnit.toUpperCase()}`
+      await AsyncStorage.setItem(
+        key,
+        typeof value === "boolean" ? JSON.stringify(value) : value.toString()
       );
     } catch (error) {
-      console.error("Error saving weight unit:", error);
+      console.error(`Error saving ${key}:`, error);
+      Alert.alert("Error", "Failed to save setting");
     }
   };
 
-  // Navigate to Profile (Edit Account)
-  const handleEditProfile = () => {
-    Navigation.navigate("Profile");
+  const toggleNotifications = (value) => {
+    setNotificationsEnabled(value);
+    saveSetting("notificationsEnabled", value);
+
+    if (value) {
+      Alert.alert("Notifications Enabled", "You'll receive app notifications");
+    }
   };
 
-  // Clear all workout data
+  const toggleWorkoutReminders = (value) => {
+    setWorkoutReminders(value);
+    saveSetting("workoutReminders", value);
+
+    if (value) {
+      Alert.alert("Reminders Enabled", "We'll remind you to workout!");
+    }
+  };
+
+  const toggleWeightUnit = async () => {
+    const newUnit = weightUnit === "kg" ? "lbs" : "kg";
+    setWeightUnit(newUnit);
+    await saveSetting("weightUnit", newUnit);
+
+    Alert.alert(
+      "Weight Unit Changed",
+      `All weights will be displayed in ${newUnit.toUpperCase()}`
+    );
+  };
+
+  const handleSaveSets = async () => {
+    if (!tempValue || parseInt(tempValue) < 1 || parseInt(tempValue) > 20) {
+      Alert.alert("Invalid Input", "Please enter a number between 1 and 20");
+      return;
+    }
+
+    setDefaultSets(tempValue);
+    await saveSetting("defaultSets", tempValue);
+    setShowSetsModal(false);
+    Alert.alert("Success", `Default sets set to ${tempValue}`);
+  };
+
+  const handleSaveReps = async () => {
+    if (!tempValue || parseInt(tempValue) < 1 || parseInt(tempValue) > 100) {
+      Alert.alert("Invalid Input", "Please enter a number between 1 and 100");
+      return;
+    }
+
+    setDefaultReps(tempValue);
+    await saveSetting("defaultReps", tempValue);
+    setShowRepsModal(false);
+    Alert.alert("Success", `Default reps set to ${tempValue}`);
+  };
+
+  const handleSaveRestTimer = async () => {
+    if (!tempValue || parseInt(tempValue) < 10 || parseInt(tempValue) > 600) {
+      Alert.alert("Invalid Input", "Please enter seconds between 10 and 600");
+      return;
+    }
+
+    setRestTimer(tempValue);
+    await saveSetting("restTimer", tempValue);
+    setShowRestTimerModal(false);
+    Alert.alert("Success", `Rest timer set to ${tempValue} seconds`);
+  };
+
+  const handleEditProfile = () => {
+    navigation.navigate("Profile");
+  };
+
+  const handleExportData = async () => {
+    try {
+      const workouts = await AsyncStorage.getItem("workouts");
+
+      if (!workouts || JSON.parse(workouts).length === 0) {
+        Alert.alert("No Data", "You don't have any workouts to export");
+        return;
+      }
+
+      // In a real app, you'd use expo-sharing or expo-file-system
+      Alert.alert(
+        "Export Data",
+        "Workout data:\n\n" +
+          workouts.substring(0, 100) +
+          "...\n\nIn production, this would save to a file or share.",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      Alert.alert("Error", "Failed to export data");
+    }
+  };
+
   const handleClearData = () => {
     Alert.alert(
       "Clear All Data",
-      "This will delete all your workouts, photos, and PRs. This action cannot be undone!",
+      "This will permanently delete all your workouts, photos, and personal records. This cannot be undone!",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete All",
+          text: "Delete Everything",
           style: "destructive",
           onPress: async () => {
             try {
@@ -103,7 +193,41 @@ function SettingsPage({ navigation }) {
     );
   };
 
-  // Logout
+  const handleResetSettings = () => {
+    Alert.alert("Reset Settings", "Reset all settings to default values?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Reset",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await AsyncStorage.multiRemove([
+              "notificationsEnabled",
+              "workoutReminders",
+              "weightUnit",
+              "defaultSets",
+              "defaultReps",
+              "restTimer",
+            ]);
+
+            // Reset to defaults
+            setNotificationsEnabled(false);
+            setWorkoutReminders(false);
+            setWeightUnit("kg");
+            setDefaultSets("3");
+            setDefaultReps("12");
+            setRestTimer("60");
+
+            Alert.alert("Success", "Settings reset to defaults");
+          } catch (error) {
+            console.error("Error resetting settings:", error);
+            Alert.alert("Error", "Failed to reset settings");
+          }
+        },
+      },
+    ]);
+  };
+
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel", style: "cancel" },
@@ -114,7 +238,10 @@ function SettingsPage({ navigation }) {
           try {
             await SecureStore.deleteItemAsync("userToken");
             await SecureStore.deleteItemAsync("userEmail");
-            navigation.navigate("Login");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
           } catch (error) {
             console.error("Error logging out:", error);
             Alert.alert("Error", "Failed to logout");
@@ -124,9 +251,52 @@ function SettingsPage({ navigation }) {
     ]);
   };
 
+  const SettingModal = ({
+    visible,
+    onClose,
+    title,
+    value,
+    onSave,
+    placeholder,
+    keyboardType = "numeric",
+  }) => (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <MaterialIcons name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalBody}>
+            <TextInput
+              style={styles.modalInput}
+              value={tempValue}
+              onChangeText={setTempValue}
+              placeholder={placeholder}
+              placeholderTextColor="#666"
+              keyboardType={keyboardType}
+              autoFocus
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -139,7 +309,7 @@ function SettingsPage({ navigation }) {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Account Section */}
+        {/* Account */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
 
@@ -155,11 +325,10 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Preferences Section */}
+        {/* Notifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>Notifications</Text>
 
-          {/* Notifications Toggle */}
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <MaterialIcons
@@ -172,8 +341,10 @@ function SettingsPage({ navigation }) {
                 color={Colors.primary}
               />
               <View>
-                <Text style={styles.settingLabel}>Notifications</Text>
-                <Text style={styles.settingSubtext}>Get workout reminders</Text>
+                <Text style={styles.settingLabel}>Push Notifications</Text>
+                <Text style={styles.settingSubtext}>
+                  Receive app notifications
+                </Text>
               </View>
             </View>
             <Switch
@@ -184,22 +355,46 @@ function SettingsPage({ navigation }) {
             />
           </View>
 
-          {/* Weight Unit Toggle */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingLeft}>
+              <MaterialCommunityIcons
+                name="bell-ring"
+                size={24}
+                color={Colors.primary}
+              />
+              <View>
+                <Text style={styles.settingLabel}>Workout Reminders</Text>
+                <Text style={styles.settingSubtext}>
+                  Daily workout reminders
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={workoutReminders}
+              onValueChange={toggleWorkoutReminders}
+              trackColor={{ false: "#333", true: Colors.primary + "80" }}
+              thumbColor={workoutReminders ? Colors.primary : "#888"}
+            />
+          </View>
+        </View>
+
+        {/* Workout Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Workout Preferences</Text>
+
           <TouchableOpacity
             style={styles.settingRow}
             onPress={toggleWeightUnit}
           >
             <View style={styles.settingLeft}>
-              <MaterialIcons
-                name="fitness-center"
+              <MaterialCommunityIcons
+                name="weight-kilogram"
                 size={24}
                 color={Colors.primary}
               />
               <View>
                 <Text style={styles.settingLabel}>Weight Unit</Text>
-                <Text style={styles.settingSubtext}>
-                  Currently using {weightUnit.toUpperCase()}
-                </Text>
+                <Text style={styles.settingSubtext}>Tap to switch units</Text>
               </View>
             </View>
             <View style={styles.unitBadge}>
@@ -208,11 +403,101 @@ function SettingsPage({ navigation }) {
               </Text>
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => {
+              setTempValue(defaultSets);
+              setShowSetsModal(true);
+            }}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialCommunityIcons
+                name="counter"
+                size={24}
+                color={Colors.primary}
+              />
+              <View>
+                <Text style={styles.settingLabel}>Default Sets</Text>
+                <Text style={styles.settingSubtext}>For new exercises</Text>
+              </View>
+            </View>
+            <View style={styles.valueContainer}>
+              <Text style={styles.valueText}>{defaultSets}</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => {
+              setTempValue(defaultReps);
+              setShowRepsModal(true);
+            }}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialCommunityIcons
+                name="repeat"
+                size={24}
+                color={Colors.primary}
+              />
+              <View>
+                <Text style={styles.settingLabel}>Default Reps</Text>
+                <Text style={styles.settingSubtext}>For new exercises</Text>
+              </View>
+            </View>
+            <View style={styles.valueContainer}>
+              <Text style={styles.valueText}>{defaultReps}</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => {
+              setTempValue(restTimer);
+              setShowRestTimerModal(true);
+            }}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialCommunityIcons
+                name="timer"
+                size={24}
+                color={Colors.primary}
+              />
+              <View>
+                <Text style={styles.settingLabel}>Rest Timer</Text>
+                <Text style={styles.settingSubtext}>
+                  Default rest between sets
+                </Text>
+              </View>
+            </View>
+            <View style={styles.valueContainer}>
+              <Text style={styles.valueText}>{restTimer}s</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Data Management Section */}
+        {/* Data & Storage */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
+          <Text style={styles.sectionTitle}>Data & Storage</Text>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={handleExportData}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="upload" size={24} color={Colors.primary} />
+              <View>
+                <Text style={styles.settingLabel}>Export Data</Text>
+                <Text style={styles.settingSubtext}>
+                  Download your workout data
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingRow} onPress={handleClearData}>
             <View style={styles.settingLeft}>
@@ -222,7 +507,7 @@ function SettingsPage({ navigation }) {
                   Clear All Data
                 </Text>
                 <Text style={styles.settingSubtext}>
-                  Delete all workouts and photos
+                  Delete all workouts permanently
                 </Text>
               </View>
             </View>
@@ -230,7 +515,7 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* About Section */}
+        {/* About */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
 
@@ -257,9 +542,27 @@ function SettingsPage({ navigation }) {
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={handleResetSettings}
+          >
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="restore" size={24} color="#FFA726" />
+              <View>
+                <Text style={[styles.settingLabel, { color: "#FFA726" }]}>
+                  Reset Settings
+                </Text>
+                <Text style={styles.settingSubtext}>
+                  Restore default settings
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
+          </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <MaterialIcons name="logout" size={24} color="#fff" />
           <Text style={styles.logoutButtonText}>Logout</Text>
@@ -267,6 +570,34 @@ function SettingsPage({ navigation }) {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Modals */}
+      <SettingModal
+        visible={showSetsModal}
+        onClose={() => setShowSetsModal(false)}
+        title="Default Sets"
+        value={defaultSets}
+        onSave={handleSaveSets}
+        placeholder="Enter number of sets (1-20)"
+      />
+
+      <SettingModal
+        visible={showRepsModal}
+        onClose={() => setShowRepsModal(false)}
+        title="Default Reps"
+        value={defaultReps}
+        onSave={handleSaveReps}
+        placeholder="Enter number of reps (1-100)"
+      />
+
+      <SettingModal
+        visible={showRestTimerModal}
+        onClose={() => setShowRestTimerModal(false)}
+        title="Rest Timer"
+        value={restTimer}
+        onSave={handleSaveRestTimer}
+        placeholder="Enter seconds (10-600)"
+      />
     </View>
   );
 }
@@ -341,6 +672,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colors.primary,
   },
+  valueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  valueText: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: "600",
+  },
   versionText: {
     fontSize: 14,
     color: "#888",
@@ -359,6 +700,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#1a1a1a",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "50%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalInput: {
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 16,
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
   },
 });
 
