@@ -1,17 +1,13 @@
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors.js";
 
 function InfoRow({ icon, label, value, onPress }) {
   return (
     <TouchableOpacity style={styles.infoRow} onPress={onPress}>
       <View style={styles.infoLeft}>
-        <MaterialCommunityIcons
-          name={icon}
-          size={24}
-          color={Colors.primary}
-        />
+        <MaterialCommunityIcons name={icon} size={24} color={Colors.primary} />
         <Text style={styles.infoLabel}>{label}</Text>
       </View>
       <View style={styles.infoRight}>

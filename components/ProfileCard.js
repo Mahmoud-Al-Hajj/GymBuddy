@@ -1,6 +1,6 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../constants/colors.js";
 
 function ProfileCard({ username, email, gender, memberSince }) {

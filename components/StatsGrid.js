@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import StatCard from "./StatCard.js";
 import { Colors } from "../constants/colors.js";
+import StatCard from "./StatCard.js";
 
 function StatsGrid({ stats }) {
   return (

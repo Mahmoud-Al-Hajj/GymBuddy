@@ -1,20 +1,17 @@
-// React Native Core
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
+  TextInput as RNTextInput,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput as RNTextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
-
 import BMICard from "../components/BMICard.js";
 import InfoRow from "../components/InfoRow.js";
 import ProfileCard from "../components/ProfileCard.js";
@@ -271,7 +268,11 @@ function ProfilePage({ navigation }) {
           <InfoRow
             icon={gender === "male" ? "gender-male" : "gender-female"}
             label="Gender"
-            value={gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : "Not set"}
+            value={
+              gender
+                ? gender.charAt(0).toUpperCase() + gender.slice(1)
+                : "Not set"
+            }
             onPress={() => openEditModal("gender", gender, "Gender")}
           />
 
