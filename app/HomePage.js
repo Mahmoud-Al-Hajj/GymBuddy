@@ -151,8 +151,6 @@ function HomePage({ navigation }) {
     setReps("");
     setWeight("");
     setShowAddWorkout(false);
-
-    Alert.alert("Success", "Workout added successfully!");
   };
 
   const handleAddExercise = (workoutId) => {

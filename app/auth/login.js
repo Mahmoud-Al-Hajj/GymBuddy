@@ -53,8 +53,6 @@ function Login({ navigation }) {
           routes: [{ name: "Onboarding" }],
         });
       }
-
-      Alert.alert("Success", "Login successful!");
     } else {
       Alert.alert("Error", "Invalid email or password");
     }
