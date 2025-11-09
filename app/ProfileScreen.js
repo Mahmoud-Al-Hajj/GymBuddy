@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -260,7 +261,19 @@ function ProfilePage({ navigation }) {
 
         {/* Stats Grid */}
         <StatsGrid stats={stats} />
-
+        {stats.totalPRs < 1 && (
+          <View style={styles.achievementContainer}>
+            <LottieView
+              source={require("../assets/animations/Trophy.json")}
+              autoPlay={true}
+              loop={true}
+              style={styles.trophyAnimation}
+            />
+            <Text style={styles.achievementText}>
+              {stats.totalPRs} Personal Records!
+            </Text>
+          </View>
+        )}
         {/* Body Metrics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Body Metrics</Text>
@@ -559,6 +572,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#000",
+  },
+  achievementContainer: {
+    alignItems: "center",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  trophyAnimation: {
+    width: 140,
+    height: 140,
+  },
+  achievementText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFD700",
+    marginTop: 12,
   },
 });
 

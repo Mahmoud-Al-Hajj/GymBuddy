@@ -1,8 +1,10 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
-import React, { useEffect, useState } from "react";
+import LottieView from "lottie-react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -43,6 +45,13 @@ function HomePage({ navigation }) {
     loadWorkouts();
     loadDefaultValues();
   }, []);
+
+  // Reload workouts when screen comes into focus (e.g., after clearing data in Profile)
+  useFocusEffect(
+    useCallback(() => {
+      loadWorkouts();
+    }, [])
+  );
 
   const loadDefaultValues = async () => {
     try {
@@ -453,15 +462,32 @@ function HomePage({ navigation }) {
       >
         {getFilteredWorkouts().length === 0 ? (
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="dumbbell" size={64} color="#333" />
-            <Text style={styles.emptyText}>
-              {searchQuery ? "No workouts found" : "No workouts yet"}
-            </Text>
-            <Text style={styles.emptySubText}>
-              {searchQuery
-                ? "Try a different search term"
-                : "Tap + to add your first workout"}
-            </Text>
+            {!searchQuery ? (
+              <>
+                <LottieView
+                  source={require("../assets/animations/Sloth sleeping.json")}
+                  autoPlay
+                  loop
+                  style={styles.lazyAnimation}
+                />
+                <Text style={styles.emptyText}>Someone's been lazy....</Text>
+                <Text style={styles.emptySubText}>
+                  Even this sloth works out more than you!
+                </Text>
+              </>
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="dumbbell"
+                  size={64}
+                  color="#333"
+                />
+                <Text style={styles.emptyText}>No workouts found</Text>
+                <Text style={styles.emptySubText}>
+                  Try a different search term
+                </Text>
+              </>
+            )}
           </View>
         ) : (
           getFilteredWorkouts().map((workout) => (
@@ -898,6 +924,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 60,
+  },
+  lazyAnimation: {
+    width: 200,
+    height: 200,
   },
   emptyText: {
     fontSize: 18,
