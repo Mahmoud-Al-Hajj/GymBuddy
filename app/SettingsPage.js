@@ -7,7 +7,6 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,8 +15,6 @@ import {
 import { Colors } from "../constants/colors.js";
 
 function SettingsPage({ navigation }) {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [workoutReminders, setWorkoutReminders] = useState(false);
   const [weightUnit, setWeightUnit] = useState("kg");
   const [defaultSets, setDefaultSets] = useState("3");
   const [defaultReps, setDefaultReps] = useState("12");
@@ -35,20 +32,12 @@ function SettingsPage({ navigation }) {
   const loadSettings = async () => {
     try {
       const settings = {
-        notifications: await AsyncStorage.getItem("notificationsEnabled"),
-        workoutReminders: await AsyncStorage.getItem("workoutReminders"),
         weightUnit: await AsyncStorage.getItem("weightUnit"),
         defaultSets: await AsyncStorage.getItem("defaultSets"),
         defaultReps: await AsyncStorage.getItem("defaultReps"),
         restTimer: await AsyncStorage.getItem("restTimer"),
       };
 
-      if (settings.notifications !== null) {
-        setNotificationsEnabled(JSON.parse(settings.notifications));
-      }
-      if (settings.workoutReminders !== null) {
-        setWorkoutReminders(JSON.parse(settings.workoutReminders));
-      }
       if (settings.weightUnit !== null) {
         setWeightUnit(settings.weightUnit);
       }
@@ -75,24 +64,6 @@ function SettingsPage({ navigation }) {
     } catch (error) {
       console.error(`Error saving ${key}:`, error);
       Alert.alert("Error", "Failed to save setting");
-    }
-  };
-
-  const toggleNotifications = (value) => {
-    setNotificationsEnabled(value);
-    saveSetting("notificationsEnabled", value);
-
-    if (value) {
-      Alert.alert("Notifications Enabled", "You'll receive app notifications");
-    }
-  };
-
-  const toggleWorkoutReminders = (value) => {
-    setWorkoutReminders(value);
-    saveSetting("workoutReminders", value);
-
-    if (value) {
-      Alert.alert("Reminders Enabled", "We'll remind you to workout!");
     }
   };
 
@@ -147,29 +118,6 @@ function SettingsPage({ navigation }) {
     navigation.navigate("Profile");
   };
 
-  const handleExportData = async () => {
-    try {
-      const workouts = await AsyncStorage.getItem("workouts");
-
-      if (!workouts || JSON.parse(workouts).length === 0) {
-        Alert.alert("No Data", "You don't have any workouts to export");
-        return;
-      }
-
-      // In a real app, you'd use expo-sharing or expo-file-system
-      Alert.alert(
-        "Export Data",
-        "Workout data:\n\n" +
-          workouts.substring(0, 100) +
-          "...\n\nIn production, this would save to a file or share.",
-        [{ text: "OK" }]
-      );
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      Alert.alert("Error", "Failed to export data");
-    }
-  };
-
   const handleClearData = () => {
     Alert.alert(
       "Clear All Data",
@@ -202,8 +150,6 @@ function SettingsPage({ navigation }) {
         onPress: async () => {
           try {
             await AsyncStorage.multiRemove([
-              "notificationsEnabled",
-              "workoutReminders",
               "weightUnit",
               "defaultSets",
               "defaultReps",
@@ -211,8 +157,6 @@ function SettingsPage({ navigation }) {
             ]);
 
             // Reset to defaults
-            setNotificationsEnabled(false);
-            setWorkoutReminders(false);
             setWeightUnit("kg");
             setDefaultSets("3");
             setDefaultReps("12");
@@ -325,59 +269,6 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Notifications */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
-
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <MaterialIcons
-                name={
-                  notificationsEnabled
-                    ? "notifications-active"
-                    : "notifications-off"
-                }
-                size={24}
-                color={Colors.primary}
-              />
-              <View>
-                <Text style={styles.settingLabel}>Push Notifications</Text>
-                <Text style={styles.settingSubtext}>
-                  Receive app notifications
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={toggleNotifications}
-              trackColor={{ false: "#333", true: Colors.primary + "80" }}
-              thumbColor={notificationsEnabled ? Colors.primary : "#888"}
-            />
-          </View>
-
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <MaterialCommunityIcons
-                name="bell-ring"
-                size={24}
-                color={Colors.primary}
-              />
-              <View>
-                <Text style={styles.settingLabel}>Workout Reminders</Text>
-                <Text style={styles.settingSubtext}>
-                  Daily workout reminders
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={workoutReminders}
-              onValueChange={toggleWorkoutReminders}
-              trackColor={{ false: "#333", true: Colors.primary + "80" }}
-              thumbColor={workoutReminders ? Colors.primary : "#888"}
-            />
-          </View>
-        </View>
-
         {/* Workout Preferences */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Workout Preferences</Text>
@@ -482,22 +373,6 @@ function SettingsPage({ navigation }) {
         {/* Data & Storage */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data & Storage</Text>
-
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={handleExportData}
-          >
-            <View style={styles.settingLeft}>
-              <MaterialIcons name="upload" size={24} color={Colors.primary} />
-              <View>
-                <Text style={styles.settingLabel}>Export Data</Text>
-                <Text style={styles.settingSubtext}>
-                  Download your workout data
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
-          </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingRow} onPress={handleClearData}>
             <View style={styles.settingLeft}>

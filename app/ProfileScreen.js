@@ -17,7 +17,7 @@ import { Colors } from "../constants/colors.js";
 function ProfilePage({ navigation }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState("male");
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");

@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Button from "../components/Button.js";
 import { Colors } from "../constants/colors.js";
 
 function HomePage({ navigation }) {
@@ -21,7 +22,10 @@ function HomePage({ navigation }) {
   const [userName, setUserName] = useState("");
   const [showAddWorkout, setShowAddWorkout] = useState(false);
   const [showWorkoutDetail, setShowWorkoutDetail] = useState(false);
+  const [showEditExercise, setShowEditExercise] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [workoutName, setWorkoutName] = useState("");
   const [exerciseName, setExerciseName] = useState("");
@@ -51,20 +55,16 @@ function HomePage({ navigation }) {
     }
   };
 
-  const convertWeight = (weightValue, fromUnit, toUnit) => {
-    if (fromUnit === toUnit) return weightValue;
-    if (fromUnit === "kg" && toUnit === "lbs") {
-      return (weightValue * 2.2).toFixed(1);
+  const getFilteredWorkouts = () => {
+    if (!searchQuery.trim()) {
+      return workouts;
     }
-    if (fromUnit === "lbs" && toUnit === "kg") {
-      return (weightValue / 2.2).toFixed(1);
-    }
-    return weightValue;
-  };
 
-  const formatWeight = (weightValue) => {
-    if (!weightValue || weightValue === 0) return "";
-    return `${weightValue} ${weightUnit}`;
+    const query = searchQuery.toLowerCase();
+
+    return workouts.filter((workout) => {
+      return workout.name.toLowerCase().includes(query);
+    });
   };
 
   const checkOnboardingStatus = async () => {
@@ -142,7 +142,6 @@ function HomePage({ navigation }) {
     const updatedWorkouts = [newWorkout, ...workouts];
     saveWorkouts(updatedWorkouts);
 
-    // Reset form
     setWorkoutName("");
     setExerciseName("");
     setSets("");
@@ -183,6 +182,92 @@ function HomePage({ navigation }) {
     setSets("");
     setReps("");
     setWeight("");
+
+    const updated = updatedWorkouts.find((w) => w.id === workoutId);
+    setSelectedWorkout(updated);
+  };
+
+  const handleOpenEditExercise = (workout, exercise) => {
+    setSelectedExercise(exercise);
+    setExerciseName(exercise.name);
+    setSets(exercise.sets.toString());
+    setReps(exercise.reps.toString());
+    setWeight(exercise.weight.toString());
+    setShowEditExercise(true);
+  };
+
+  const handleSaveEditExercise = () => {
+    if (!exerciseName.trim() || !sets || !reps) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    const updatedWorkouts = workouts.map((workout) => {
+      if (workout.id === selectedWorkout.id) {
+        return {
+          ...workout,
+          exercises: workout.exercises.map((ex) =>
+            ex.id === selectedExercise.id
+              ? {
+                  ...ex,
+                  name: exerciseName,
+                  sets: parseInt(sets),
+                  reps: parseInt(reps),
+                  weight: weight ? parseFloat(weight) : 0,
+                }
+              : ex
+          ),
+        };
+      }
+      return workout;
+    });
+
+    saveWorkouts(updatedWorkouts);
+
+    const updated = updatedWorkouts.find((w) => w.id === selectedWorkout.id);
+    setSelectedWorkout(updated);
+
+    setShowEditExercise(false);
+    setExerciseName("");
+    setSets("");
+    setReps("");
+    setWeight("");
+
+    Alert.alert("Success", "Exercise updated successfully!");
+  };
+
+  const handleDeleteExercise = (workoutId, exerciseId) => {
+    Alert.alert(
+      "Delete Exercise",
+      "Are you sure you want to delete this exercise?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            const updatedWorkouts = workouts.map((workout) => {
+              if (workout.id === workoutId) {
+                return {
+                  ...workout,
+                  exercises: workout.exercises.filter(
+                    (ex) => ex.id !== exerciseId
+                  ),
+                };
+              }
+              return workout;
+            });
+
+            saveWorkouts(updatedWorkouts);
+
+            const updated = updatedWorkouts.find((w) => w.id === workoutId);
+            setSelectedWorkout(updated);
+
+            Alert.alert("Success", "Exercise deleted");
+          },
+        },
+      ]
+    );
   };
 
   const toggleExerciseComplete = (workoutId, exerciseId) => {
@@ -198,6 +283,9 @@ function HomePage({ navigation }) {
       return workout;
     });
     saveWorkouts(updatedWorkouts);
+
+    const updated = updatedWorkouts.find((w) => w.id === workoutId);
+    setSelectedWorkout(updated);
   };
 
   const markPersonalBest = (workoutId, exerciseId) => {
@@ -219,6 +307,10 @@ function HomePage({ navigation }) {
       return workout;
     });
     saveWorkouts(updatedWorkouts);
+
+    const updated = updatedWorkouts.find((w) => w.id === workoutId);
+    setSelectedWorkout(updated);
+
     Alert.alert("Personal Best!", "New PR logged successfully!");
   };
 
@@ -257,12 +349,9 @@ function HomePage({ navigation }) {
         });
 
         await saveWorkouts(updatedWorkouts);
-
-        // Find the workout we just updated and show it in the modal
         const updatedSelectedWorkout = updatedWorkouts.find(
-          (workout) => workout.id === workoutId
+          (w) => w.id === workoutId
         );
-
         setSelectedWorkout(updatedSelectedWorkout);
       }
     } catch (error) {
@@ -347,7 +436,6 @@ function HomePage({ navigation }) {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
-            // Reload settings before opening modal
             loadDefaultValues();
             setShowAddWorkout(true);
           }}
@@ -356,25 +444,55 @@ function HomePage({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <MaterialIcons
+          name="search"
+          size={20}
+          color="#888"
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search workouts..."
+          placeholderTextColor="#666"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setSearchQuery("")}
+            style={styles.clearButton}
+          >
+            <MaterialIcons name="close" size={20} color="#888" />
+          </TouchableOpacity>
+        )}
+      </View>
+
       <ScrollView
         style={styles.workoutsList}
         showsVerticalScrollIndicator={false}
       >
-        {workouts.length === 0 ? (
+        {getFilteredWorkouts().length === 0 ? (
           <View style={styles.emptyState}>
             <MaterialCommunityIcons name="dumbbell" size={64} color="#333" />
-            <Text style={styles.emptyText}>No workouts yet</Text>
+            <Text style={styles.emptyText}>
+              {searchQuery ? "No workouts found" : "No workouts yet"}
+            </Text>
             <Text style={styles.emptySubText}>
-              Tap + to add your first workout
+              {searchQuery
+                ? "Try a different search term"
+                : "Tap + to add your first workout"}
             </Text>
           </View>
         ) : (
-          workouts.map((workout) => (
+          getFilteredWorkouts().map((workout) => (
             <TouchableOpacity
               key={workout.id}
               style={styles.workoutCard}
               onPress={() => {
-                // Reload settings before opening workout detail
                 loadDefaultValues();
                 setSelectedWorkout(workout);
                 setShowWorkoutDetail(true);
@@ -423,6 +541,7 @@ function HomePage({ navigation }) {
         )}
       </ScrollView>
 
+      {/* Add Workout Modal */}
       <Modal
         visible={showAddWorkout}
         animationType="slide"
@@ -482,7 +601,7 @@ function HomePage({ navigation }) {
                 </View>
               </View>
 
-              <Text style={styles.inputLabel}>Weight (kg)</Text>
+              <Text style={styles.inputLabel}>Weight ({weightUnit})</Text>
               <TextInput
                 style={styles.input}
                 placeholder="60"
@@ -503,6 +622,7 @@ function HomePage({ navigation }) {
         </View>
       </Modal>
 
+      {/* Workout Detail Modal */}
       <Modal
         visible={showWorkoutDetail}
         animationType="slide"
@@ -561,6 +681,7 @@ function HomePage({ navigation }) {
                       color={exercise.completed ? Colors.primary : "#666"}
                     />
                   </TouchableOpacity>
+
                   <View style={styles.exerciseInfo}>
                     <Text
                       style={[
@@ -576,6 +697,20 @@ function HomePage({ navigation }) {
                         ` • ${exercise.weight} ${weightUnit}`}
                     </Text>
                   </View>
+
+                  <TouchableOpacity
+                    style={styles.prButton}
+                    onPress={() =>
+                      handleOpenEditExercise(selectedWorkout, exercise)
+                    }
+                  >
+                    <MaterialIcons
+                      name="edit"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  </TouchableOpacity>
+
                   <TouchableOpacity
                     style={styles.prButton}
                     onPress={() =>
@@ -670,6 +805,91 @@ function HomePage({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      {/* Edit Exercise Modal */}
+      <Modal
+        visible={showEditExercise}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditExercise(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Exercise</Text>
+              <TouchableOpacity onPress={() => setShowEditExercise(false)}>
+                <MaterialIcons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.inputLabel}>Exercise Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g., Bench Press"
+                placeholderTextColor="#666"
+                value={exerciseName}
+                onChangeText={setExerciseName}
+              />
+
+              <View style={styles.row}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Sets *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="3"
+                    placeholderTextColor="#666"
+                    keyboardType="numeric"
+                    value={sets}
+                    onChangeText={setSets}
+                  />
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Reps *</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="12"
+                    placeholderTextColor="#666"
+                    keyboardType="numeric"
+                    value={reps}
+                    onChangeText={setReps}
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.inputLabel}>Weight ({weightUnit})</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="60"
+                placeholderTextColor="#666"
+                keyboardType="numeric"
+                value={weight}
+                onChangeText={setWeight}
+              />
+
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSaveEditExercise}
+              >
+                <Text style={styles.submitButtonText}>Save Changes</Text>
+              </TouchableOpacity>
+
+              <Button
+                label="Delete Exercise"
+                onPress={() => {
+                  setShowEditExercise(false);
+                  handleDeleteExercise(
+                    selectedWorkout?.id,
+                    selectedExercise?.id
+                  );
+                }}
+                style={styles.deleteButton}
+                textStyle={styles.deleteButtonText}
+              />
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -696,9 +916,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#888",
     marginTop: 4,
-  },
-  logoutButton: {
-    padding: 8,
   },
   profileButton: {
     padding: 8,
@@ -886,6 +1103,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
+  deleteButton: {
+    backgroundColor: "#ff4444",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+  },
   sectionHeader: {
     fontSize: 18,
     fontWeight: "bold",
@@ -984,6 +1214,30 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 12,
     backgroundColor: "#2a2a2a",
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    height: 50,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 16,
+    paddingVertical: 12,
+  },
+  clearButton: {
+    padding: 4,
+    marginLeft: 8,
   },
 });
 

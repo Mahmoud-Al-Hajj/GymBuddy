@@ -69,7 +69,7 @@ function Login({ navigation }) {
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => navigation.goBack()}
         >
           <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
