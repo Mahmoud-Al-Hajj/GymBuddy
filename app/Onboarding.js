@@ -29,7 +29,10 @@ function Onboarding({ navigation }) {
       try {
         await SecureStore.setItemAsync("userGender", gender);
         await SecureStore.setItemAsync("userAge", age.toString());
-        await SecureStore.setItemAsync("userWeight", weight.toString());
+        await SecureStore.setItemAsync(
+          "userWeight",
+          (parseInt(weight) || 54).toString()
+        );
 
         alert("Profile setup complete!");
 
@@ -146,7 +149,7 @@ function Onboarding({ navigation }) {
         <View style={styles.weightInputContainer}>
           <TouchableOpacity
             style={styles.weightButton}
-            onPress={() => setWeight(Math.max(40, weight - 1))}
+            onPress={() => setWeight(Math.max(1, (parseInt(weight) || 54) - 1))}
           >
             <Text style={styles.weightButtonText}>-</Text>
           </TouchableOpacity>
@@ -156,23 +159,25 @@ function Onboarding({ navigation }) {
               style={styles.weightInput}
               value={weight.toString()}
               onChangeText={(text) => {
-                const num = parseInt(text) || 0;
-                if (num >= 40 && num <= 200) {
+                const num = parseInt(text);
+                if (!isNaN(num) && num >= 1 && num <= 300) {
                   setWeight(num);
-                } else if (text === "") {
-                  setWeight(40);
                 }
               }}
               keyboardType="numeric"
               maxLength={3}
               selectTextOnFocus
+              placeholder="54"
+              placeholderTextColor="#666"
             />
             <Text style={styles.weightUnit}>kg</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.weightButton}
-            onPress={() => setWeight(Math.min(200, weight + 1))}
+            onPress={() =>
+              setWeight(Math.min(300, (parseInt(weight) || 54) + 1))
+            }
           >
             <Text style={styles.weightButtonText}>+</Text>
           </TouchableOpacity>

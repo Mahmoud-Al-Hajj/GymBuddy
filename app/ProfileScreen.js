@@ -148,6 +148,40 @@ function ProfilePage({ navigation }) {
       return;
     }
 
+    if (
+      editField === "age" ||
+      editField === "weight" ||
+      editField === "height"
+    ) {
+      const numValue = parseFloat(editValue);
+
+      if (isNaN(numValue)) {
+        Alert.alert("Error", "Please enter a valid number");
+        return;
+      }
+
+      if (editField === "age") {
+        if (numValue < 13 || numValue > 100) {
+          Alert.alert("Error", "Age must be between 13 and 100 years");
+          return;
+        }
+      }
+
+      if (editField === "weight") {
+        if (numValue < 20 || numValue > 400) {
+          Alert.alert("Error", "Weight must be between 20 and 400 kg");
+          return;
+        }
+      }
+
+      if (editField === "height") {
+        if (numValue < 100 || numValue > 250) {
+          Alert.alert("Error", "Height must be between 100 and 250 cm");
+          return;
+        }
+      }
+    }
+
     try {
       switch (editField) {
         case "gender":
@@ -265,8 +299,8 @@ function ProfilePage({ navigation }) {
           <View style={styles.achievementContainer}>
             <LottieView
               source={require("../assets/animations/Trophy.json")}
-              autoPlay={true}
-              loop={true}
+              autoPlay
+              loop
               style={styles.trophyAnimation}
             />
             <Text style={styles.achievementText}>
