@@ -15,6 +15,9 @@ import {
   View,
 } from "react-native";
 import Button from "../components/Button.js";
+import SearchBar from "../components/SearchBar.js";
+import StatCard from "../components/StatCard.js";
+import WorkoutCard from "../components/WorkoutCard.js";
 import { Colors } from "../constants/colors.js";
 
 function HomePage({ navigation }) {
@@ -403,32 +406,27 @@ function HomePage({ navigation }) {
       </View>
 
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons
-            name="dumbbell"
-            size={24}
-            color={Colors.primary}
-          />
-          <Text style={styles.statNumber}>{workouts.length}</Text>
-          <Text style={styles.statLabel}>Workouts</Text>
-        </View>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="trophy" size={24} color="#FFD700" />
-          <Text style={styles.statNumber}>
-            {workouts.reduce(
-              (sum, w) => sum + (w.personalBests?.length || 0),
-              0
-            )}
-          </Text>
-          <Text style={styles.statLabel}>PRs</Text>
-        </View>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="camera" size={24} color="#4CAF50" />
-          <Text style={styles.statNumber}>
-            {workouts.reduce((sum, w) => sum + (w.photos?.length || 0), 0)}
-          </Text>
-          <Text style={styles.statLabel}>Photos</Text>
-        </View>
+        <StatCard
+          icon="dumbbell"
+          number={workouts.length}
+          label="Workouts"
+          color={Colors.primary}
+        />
+        <StatCard
+          icon="trophy"
+          number={workouts.reduce(
+            (sum, w) => sum + (w.personalBests?.length || 0),
+            0
+          )}
+          label="PRs"
+          color="#FFD700"
+        />
+        <StatCard
+          icon="camera"
+          number={workouts.reduce((sum, w) => sum + (w.photos?.length || 0), 0)}
+          label="Photos"
+          color="#4CAF50"
+        />
       </View>
 
       <View style={styles.workoutsHeader}>
@@ -445,31 +443,11 @@ function HomePage({ navigation }) {
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <MaterialIcons
-          name="search"
-          size={20}
-          color="#888"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search workouts..."
-          placeholderTextColor="#666"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setSearchQuery("")}
-            style={styles.clearButton}
-          >
-            <MaterialIcons name="close" size={20} color="#888" />
-          </TouchableOpacity>
-        )}
-      </View>
+      <SearchBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onClear={() => setSearchQuery("")}
+      />
 
       <ScrollView
         style={styles.workoutsList}
@@ -489,54 +467,16 @@ function HomePage({ navigation }) {
           </View>
         ) : (
           getFilteredWorkouts().map((workout) => (
-            <TouchableOpacity
+            <WorkoutCard
               key={workout.id}
-              style={styles.workoutCard}
+              workout={workout}
+              formatDate={formatDate}
               onPress={() => {
                 loadDefaultValues();
                 setSelectedWorkout(workout);
                 setShowWorkoutDetail(true);
               }}
-            >
-              <View style={styles.workoutCardHeader}>
-                <View>
-                  <Text style={styles.workoutName}>{workout.name}</Text>
-                  <Text style={styles.workoutDate}>
-                    {formatDate(workout.date)}
-                  </Text>
-                </View>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={24}
-                  color="#666"
-                />
-              </View>
-
-              <View style={styles.workoutStats}>
-                <View style={styles.workoutStatItem}>
-                  <MaterialCommunityIcons
-                    name="weight-lifter"
-                    size={18}
-                    color={Colors.primary}
-                  />
-                  <Text style={styles.workoutStatText}>
-                    {workout.exercises.length} exercises
-                  </Text>
-                </View>
-                {workout.personalBests?.length > 0 && (
-                  <View style={styles.workoutStatItem}>
-                    <MaterialCommunityIcons
-                      name="trophy"
-                      size={18}
-                      color="#FFD700"
-                    />
-                    <Text style={styles.workoutStatText}>
-                      {workout.personalBests.length} PRs
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
+            />
           ))
         )}
       </ScrollView>
@@ -932,24 +872,6 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 4,
-  },
   workoutsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -989,41 +911,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#444",
     marginTop: 8,
-  },
-  workoutCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  workoutCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  workoutName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  workoutDate: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 4,
-  },
-  workoutStats: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  workoutStatItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  workoutStatText: {
-    fontSize: 13,
-    color: "#aaa",
   },
   modalOverlay: {
     flex: 1,
@@ -1214,30 +1101,6 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 12,
     backgroundColor: "#2a2a2a",
-  },
-
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    height: 50,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 16,
-    paddingVertical: 12,
-  },
-  clearButton: {
-    padding: 4,
-    marginLeft: 8,
   },
 });
 

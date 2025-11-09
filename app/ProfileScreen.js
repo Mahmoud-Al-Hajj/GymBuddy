@@ -1,17 +1,24 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
+// React Native Core
 import { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
-  TextInput as RNTextInput,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput as RNTextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+
+import BMICard from "../components/BMICard.js";
+import InfoRow from "../components/InfoRow.js";
+import ProfileCard from "../components/ProfileCard.js";
+import StatsGrid from "../components/StatsGrid.js";
 import { Colors } from "../constants/colors.js";
 
 function ProfilePage({ navigation }) {
@@ -247,159 +254,51 @@ function ProfilePage({ navigation }) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <MaterialCommunityIcons
-                name={
-                  gender === "male" ? "face-man-profile" : "face-woman-profile"
-                }
-                size={48}
-                color={Colors.primary}
-              />
-            </View>
-          </View>
-          <Text style={styles.profileName}>{username}</Text>
-          <Text style={styles.profileEmail}>{email}</Text>
-          <Text style={styles.memberSince}>
-            Member since {stats.memberSince}
-          </Text>
-        </View>
+        <ProfileCard
+          username={username}
+          email={email}
+          gender={gender}
+          memberSince={stats.memberSince}
+        />
 
         {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statBox}>
-            <MaterialCommunityIcons
-              name="dumbbell"
-              size={28}
-              color={Colors.primary}
-            />
-            <Text style={styles.statNumber}>{stats.totalWorkouts}</Text>
-            <Text style={styles.statLabel}>Workouts</Text>
-          </View>
-          <View style={styles.statBox}>
-            <MaterialCommunityIcons name="trophy" size={28} color="#FFD700" />
-            <Text style={styles.statNumber}>{stats.totalPRs}</Text>
-            <Text style={styles.statLabel}>PRs</Text>
-          </View>
-          <View style={styles.statBox}>
-            <MaterialCommunityIcons name="camera" size={28} color="#4CAF50" />
-            <Text style={styles.statNumber}>{stats.totalPhotos}</Text>
-            <Text style={styles.statLabel}>Photos</Text>
-          </View>
-        </View>
+        <StatsGrid stats={stats} />
 
         {/* Body Metrics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Body Metrics</Text>
 
-          <TouchableOpacity
-            style={styles.infoRow}
+          <InfoRow
+            icon={gender === "male" ? "gender-male" : "gender-female"}
+            label="Gender"
+            value={gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : "Not set"}
             onPress={() => openEditModal("gender", gender, "Gender")}
-          >
-            <View style={styles.infoLeft}>
-              <MaterialCommunityIcons
-                name={gender === "male" ? "gender-male" : "gender-female"}
-                size={24}
-                color={Colors.primary}
-              />
-              <Text style={styles.infoLabel}>Gender</Text>
-            </View>
-            <View style={styles.infoRight}>
-              <Text style={styles.infoValue}>
-                {gender
-                  ? gender.charAt(0).toUpperCase() + gender.slice(1)
-                  : "Not set"}
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </View>
-          </TouchableOpacity>
+          />
 
-          <TouchableOpacity
-            style={styles.infoRow}
+          <InfoRow
+            icon="calendar"
+            label="Age"
+            value={age ? `${age} years` : "Not set"}
             onPress={() => openEditModal("age", age, "Age")}
-          >
-            <View style={styles.infoLeft}>
-              <MaterialCommunityIcons
-                name="calendar"
-                size={24}
-                color={Colors.primary}
-              />
-              <Text style={styles.infoLabel}>Age</Text>
-            </View>
-            <View style={styles.infoRight}>
-              <Text style={styles.infoValue}>
-                {age ? `${age} years` : "Not set"}
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </View>
-          </TouchableOpacity>
+          />
 
-          <TouchableOpacity
-            style={styles.infoRow}
+          <InfoRow
+            icon="weight"
+            label="Weight"
+            value={weight ? `${weight} kg` : "Not set"}
             onPress={() => openEditModal("weight", weight, "Weight")}
-          >
-            <View style={styles.infoLeft}>
-              <MaterialCommunityIcons
-                name="weight"
-                size={24}
-                color={Colors.primary}
-              />
-              <Text style={styles.infoLabel}>Weight</Text>
-            </View>
-            <View style={styles.infoRight}>
-              <Text style={styles.infoValue}>
-                {weight ? `${weight} kg` : "Not set"}
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </View>
-          </TouchableOpacity>
+          />
 
-          <TouchableOpacity
-            style={styles.infoRow}
+          <InfoRow
+            icon="human-male-height"
+            label="Height"
+            value={height ? `${height} cm` : "Not set"}
             onPress={() => openEditModal("height", height, "Height")}
-          >
-            <View style={styles.infoLeft}>
-              <MaterialCommunityIcons
-                name="human-male-height"
-                size={24}
-                color={Colors.primary}
-              />
-              <Text style={styles.infoLabel}>Height</Text>
-            </View>
-            <View style={styles.infoRight}>
-              <Text style={styles.infoValue}>
-                {height ? `${height} cm` : "Not set"}
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </View>
-          </TouchableOpacity>
+          />
         </View>
 
         {/* BMI Card */}
-        {bmi && (
-          <View style={styles.bmiCard}>
-            <View style={styles.bmiHeader}>
-              <Text style={styles.bmiTitle}>Body Mass Index (BMI)</Text>
-              <View
-                style={[
-                  styles.bmiCategoryBadge,
-                  { backgroundColor: bmiCategory.color + "20" },
-                ]}
-              >
-                <Text
-                  style={[styles.bmiCategoryText, { color: bmiCategory.color }]}
-                >
-                  {bmiCategory.text}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.bmiValue}>{bmi}</Text>
-            <Text style={styles.bmiSubtext}>
-              Based on your height and weight
-            </Text>
-          </View>
-        )}
+        <BMICard bmi={bmi} bmiCategory={bmiCategory} />
 
         {/* Danger Zone */}
         <View style={styles.dangerSection}>
@@ -540,64 +439,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  profileCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: Colors.primary,
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 8,
-  },
-  memberSince: {
-    fontSize: 12,
-    color: Colors.primary,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 4,
-  },
   section: {
     marginBottom: 20,
   },
@@ -606,70 +447,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-  },
-  infoLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  infoLabel: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  infoRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: "#888",
-  },
-  bmiCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
-  bmiHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  bmiTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  bmiCategoryBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  bmiCategoryText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  bmiValue: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: Colors.primary,
-    marginBottom: 4,
-  },
-  bmiSubtext: {
-    fontSize: 13,
-    color: "#888",
   },
 
   dangerSection: {
