@@ -5,9 +5,11 @@ import { useState } from "react";
 import {
   Alert,
   ImageBackground,
+  Keyboard,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import * as Yup from "yup";
@@ -63,66 +65,70 @@ function Login({ navigation }) {
       style={styles.backgroundImage}
       blurRadius={4}
     >
-      <View style={styles.overlay} />
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={28} color="#fff" />
-        </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.overlay} />
+      </TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.content}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={28} color="#fff" />
+          </TouchableOpacity>
 
-        <View style={styles.TextContainer}>
-          <Text style={styles.title}>
-            Welcome to <Text style={{ color: Colors.primary }}>GymBuddy</Text>
-          </Text>
-          <Text style={styles.tagline}>Your Personal Fitness Companion</Text>
-          <Text style={styles.subtitle}>
-            Track workouts • Build habits • Achieve goals
-          </Text>
+          <View style={styles.TextContainer}>
+            <Text style={styles.title}>
+              Welcome to <Text style={{ color: Colors.primary }}>GymBuddy</Text>
+            </Text>
+            <Text style={styles.tagline}>Your Personal Fitness Companion</Text>
+            <Text style={styles.subtitle}>
+              Track workouts • Build habits • Achieve goals
+            </Text>
+          </View>
+
+          <Formik
+            initialValues={{ email: "", password: "" }}
+            validationSchema={loginValidationSchema}
+            onSubmit={handleLogin}
+          >
+            {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
+              <View style={styles.formContainer}>
+                <TextInput
+                  label="Email"
+                  placeholder="Enter your email"
+                  placeholderTextColor="#fff"
+                  value={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  error={errors.email}
+                  keyboardType="email-address"
+                  color={Colors.primary}
+                />
+
+                <TextInput
+                  label="Password"
+                  placeholder="Enter your password"
+                  placeholderTextColor="#fff"
+                  value={values.password}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  error={errors.password}
+                  secureTextEntry
+                  color={Colors.primary}
+                />
+
+                <Button
+                  label="Login"
+                  onPress={handleSubmit}
+                  style={styles.button}
+                  textStyle={styles.textStyle}
+                />
+              </View>
+            )}
+          </Formik>
         </View>
-
-        <Formik
-          initialValues={{ email: "", password: "" }}
-          validationSchema={loginValidationSchema}
-          onSubmit={handleLogin}
-        >
-          {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
-            <View style={styles.formContainer}>
-              <TextInput
-                label="Email"
-                placeholder="Enter your email"
-                placeholderTextColor="#fff"
-                value={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                error={errors.email}
-                keyboardType="email-address"
-                color={Colors.primary}
-              />
-
-              <TextInput
-                label="Password"
-                placeholder="Enter your password"
-                placeholderTextColor="#fff"
-                value={values.password}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-                error={errors.password}
-                secureTextEntry
-                color={Colors.primary}
-              />
-
-              <Button
-                label="Login"
-                onPress={handleSubmit}
-                style={styles.button}
-                textStyle={styles.textStyle}
-              />
-            </View>
-          )}
-        </Formik>
-      </View>
+      </TouchableWithoutFeedback>
       <View />
     </ImageBackground>
   );

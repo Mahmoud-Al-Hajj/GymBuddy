@@ -3,17 +3,16 @@ import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
-  Dimensions,
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { Colors } from "../constants/colors.js";
-
-const { height } = Dimensions.get("window");
 
 function Onboarding({ navigation }) {
   const router = useRouter();
@@ -154,7 +153,7 @@ function Onboarding({ navigation }) {
             <Text style={styles.weightButtonText}>-</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.weightDisplay}>
+          <View style={styles.weightDisplay}>
             <TextInput
               style={styles.weightInput}
               value={weight.toString()}
@@ -171,7 +170,7 @@ function Onboarding({ navigation }) {
               placeholderTextColor="#666"
             />
             <Text style={styles.weightUnit}>kg</Text>
-          </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={styles.weightButton}
@@ -187,45 +186,53 @@ function Onboarding({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.progressBar}>
-        {[0, 1, 2].map((step) => (
-          <View
-            key={step}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.progressBar} pointerEvents="box-none">
+          {[0, 1, 2].map((step) => (
+            <View
+              key={step}
+              style={[
+                styles.progressDot,
+                step <= currentStep && styles.progressDotActive,
+              ]}
+            />
+          ))}
+        </View>
+
+        <View style={styles.content} pointerEvents="box-none">
+          {currentStep === 0 && renderGenderScreen()}
+          {currentStep === 1 && renderAgeScreen()}
+          {currentStep === 2 && renderWeightScreen()}
+        </View>
+
+        <View style={styles.navigationContainer} pointerEvents="box-none">
+          {currentStep > 0 && (
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color="#fff"
+              />
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
             style={[
-              styles.progressDot,
-              step <= currentStep && styles.progressDotActive,
+              styles.nextButton,
+              currentStep === 0 && !gender && styles.nextButtonDisabled,
             ]}
-          />
-        ))}
-      </View>
-
-      {currentStep === 0 && renderGenderScreen()}
-      {currentStep === 1 && renderAgeScreen()}
-      {currentStep === 2 && renderWeightScreen()}
-
-      <View style={styles.navigationContainer}>
-        {currentStep > 0 && (
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
+            onPress={handleNext}
+            disabled={currentStep === 0 && !gender}
+          >
+            <Text style={styles.nextButtonText}>
+              {currentStep === 2 ? "Finish" : "Next"}
+            </Text>
+            <MaterialCommunityIcons name="arrow-right" size={20} color="#000" />
           </TouchableOpacity>
-        )}
-
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            currentStep === 0 && !gender && styles.nextButtonDisabled,
-          ]}
-          onPress={handleNext}
-          disabled={currentStep === 0 && !gender}
-        >
-          <Text style={styles.nextButtonText}>
-            {currentStep === 2 ? "Finish" : "Next"}
-          </Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color="#000" />
-        </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -234,6 +241,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1a1a1a",
     paddingTop: 60,
+  },
+  content: {
+    flex: 1,
   },
   progressBar: {
     flexDirection: "row",
@@ -299,6 +309,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingVertical: 100,
     alignItems: "center",
+    marginTop: -70,
   },
   ageText: {
     fontSize: 32,

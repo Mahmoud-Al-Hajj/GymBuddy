@@ -16,9 +16,9 @@ import { Colors } from "../constants/colors.js";
 
 function SettingsPage({ navigation }) {
   const [weightUnit, setWeightUnit] = useState("kg");
-  const [defaultSets, setDefaultSets] = useState("3");
-  const [defaultReps, setDefaultReps] = useState("12");
-  const [restTimer, setRestTimer] = useState("60");
+  const [defaultSets, setDefaultSets] = useState("");
+  const [defaultReps, setDefaultReps] = useState("");
+  const [restTimer, setRestTimer] = useState("");
 
   const [showSetsModal, setShowSetsModal] = useState(false);
   const [showRepsModal, setShowRepsModal] = useState(false);
@@ -158,9 +158,9 @@ function SettingsPage({ navigation }) {
 
             // Reset to defaults
             setWeightUnit("kg");
-            setDefaultSets("3");
-            setDefaultReps("12");
-            setRestTimer("60");
+            setDefaultSets("");
+            setDefaultReps("");
+            setRestTimer("");
 
             Alert.alert("Success", "Settings reset to defaults");
           } catch (error) {
@@ -370,26 +370,6 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Data & Storage */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data & Storage</Text>
-
-          <TouchableOpacity style={styles.settingRow} onPress={handleClearData}>
-            <View style={styles.settingLeft}>
-              <MaterialIcons name="delete-sweep" size={24} color="#ff4444" />
-              <View>
-                <Text style={[styles.settingLabel, { color: "#ff4444" }]}>
-                  Clear All Data
-                </Text>
-                <Text style={styles.settingSubtext}>
-                  Delete all workouts permanently
-                </Text>
-              </View>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
-
         {/* About */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
@@ -399,7 +379,7 @@ function SettingsPage({ navigation }) {
               <MaterialIcons name="info" size={24} color="#888" />
               <Text style={styles.settingLabel}>App Version</Text>
             </View>
-            <Text style={styles.versionText}>1.0.0</Text>
+            <Text style={styles.versionText}>GymBuddy 1.0.0</Text>
           </View>
 
           <TouchableOpacity style={styles.settingRow}>
@@ -436,12 +416,6 @@ function SettingsPage({ navigation }) {
             <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
         </View>
-
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <MaterialIcons name="logout" size={24} color="#fff" />
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
 
         <View style={{ height: 40 }} />
       </ScrollView>

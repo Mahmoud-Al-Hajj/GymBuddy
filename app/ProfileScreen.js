@@ -224,7 +224,10 @@ function ProfilePage({ navigation }) {
             await SecureStore.deleteItemAsync("userAge");
             await SecureStore.deleteItemAsync("userWeight");
 
-            navigation.navigate("Login");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Landing" }],
+            });
           } catch (error) {
             console.error("Error logging out:", error);
           }
