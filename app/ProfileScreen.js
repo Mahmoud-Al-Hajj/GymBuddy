@@ -219,9 +219,6 @@ function ProfilePage({ navigation }) {
           try {
             await SecureStore.deleteItemAsync("userToken");
             await SecureStore.deleteItemAsync("userEmail");
-            await SecureStore.deleteItemAsync("userGender");
-            await SecureStore.deleteItemAsync("userAge");
-            await SecureStore.deleteItemAsync("userWeight");
 
             navigation.reset({
               index: 0,
@@ -247,6 +244,10 @@ function ProfilePage({ navigation }) {
           onPress: async () => {
             try {
               await AsyncStorage.removeItem("workouts");
+              await SecureStore.deleteItemAsync("userGender");
+              await SecureStore.deleteItemAsync("userAge");
+              await SecureStore.deleteItemAsync("userWeight");
+
               setStats({
                 ...stats,
                 totalWorkouts: 0,

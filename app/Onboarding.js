@@ -31,6 +31,7 @@ function Onboarding({ navigation }) {
           "userWeight",
           (parseInt(weight) || 54).toString()
         );
+        await SecureStore.setItemAsync("onboardingCompleted", "true");
 
         alert("Profile setup complete!");
 

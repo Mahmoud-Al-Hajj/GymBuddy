@@ -81,11 +81,11 @@ function HomePage({ navigation }) {
 
   const checkOnboardingStatus = async () => {
     try {
-      const userGender = await SecureStore.getItemAsync("userGender");
-      const userAge = await SecureStore.getItemAsync("userAge");
-      const userWeight = await SecureStore.getItemAsync("userWeight");
+      const onboardingCompleted = await SecureStore.getItemAsync(
+        "onboardingCompleted"
+      );
 
-      if (!userGender || !userAge || !userWeight) {
+      if (onboardingCompleted !== "true") {
         navigation.reset({
           index: 0,
           routes: [{ name: "Onboarding" }],
