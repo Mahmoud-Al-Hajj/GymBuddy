@@ -1,7 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -265,6 +264,32 @@ function ProfilePage({ navigation }) {
     );
   };
 
+  const getAchievements = () => {
+    const workoutCount = stats.totalWorkouts;
+    const prCount = stats.totalPRs;
+
+    return [
+      { id: 1, name: "First Step", icon: "👣", unlocked: workoutCount >= 1 },
+      {
+        id: 2,
+        name: "Getting Started",
+        icon: "💪",
+        unlocked: workoutCount >= 3,
+      },
+      { id: 3, name: "Committed", icon: "🔥", unlocked: workoutCount >= 5 },
+      { id: 4, name: "Gym Rat", icon: "🐀", unlocked: workoutCount >= 7 },
+      { id: 5, name: "L Ossa Kella", icon: "🦁", unlocked: workoutCount >= 10 },
+      { id: 6, name: "PR King", icon: "👑", unlocked: prCount >= 10 },
+      {
+        id: 7,
+        name: "Photographer",
+        icon: "📸",
+        unlocked: stats.totalPhotos >= 5,
+      },
+      { id: 8, name: "Legend", icon: "⭐", unlocked: workoutCount >= 15 },
+    ];
+  };
+
   const bmi = calculateBMI();
   const bmiCategory = getBMICategory(bmi);
 
@@ -298,19 +323,28 @@ function ProfilePage({ navigation }) {
 
         {/* Stats Grid */}
         <StatsGrid stats={stats} />
-        {stats.totalPRs < 1 && (
-          <View style={styles.achievementContainer}>
-            <LottieView
-              source={require("../assets/animations/Trophy.json")}
-              autoPlay
-              loop
-              style={styles.trophyAnimation}
-            />
-            <Text style={styles.achievementText}>
-              {stats.totalPRs} Personal Records!
-            </Text>
-          </View>
-        )}
+
+        {/* Achievements Section */}
+        <View style={styles.achievementsSection}>
+          <Text style={styles.achievementTitle}>Achievements</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.achievementsRow}>
+              {getAchievements().map((achievement) => (
+                <View
+                  key={achievement.id}
+                  style={[
+                    styles.achievementBadge,
+                    !achievement.unlocked && styles.achievementLocked,
+                  ]}
+                >
+                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
+                  <Text style={styles.achievementName}>{achievement.name}</Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+
         {/* Body Metrics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Body Metrics</Text>
@@ -498,6 +532,44 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 12,
+  },
+  achievementsSection: {
+    marginBottom: 20,
+  },
+  achievementTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 12,
+  },
+  achievementsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  achievementBadge: {
+    width: 90,
+    height: 90,
+    backgroundColor: Colors.primary + "30",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  achievementLocked: {
+    backgroundColor: "#2a2a2a",
+    borderColor: "#444",
+    opacity: 0.5,
+  },
+  achievementIcon: {
+    fontSize: 32,
+    marginBottom: 4,
+  },
+  achievementName: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "center",
   },
 
   dangerSection: {
