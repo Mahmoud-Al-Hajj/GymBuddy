@@ -247,6 +247,7 @@ function ProfilePage({ navigation }) {
               await SecureStore.deleteItemAsync("userGender");
               await SecureStore.deleteItemAsync("userAge");
               await SecureStore.deleteItemAsync("userWeight");
+              await SecureStore.deleteItemAsync("onboardingCompleted");
 
               setStats({
                 ...stats,
@@ -254,7 +255,10 @@ function ProfilePage({ navigation }) {
                 totalPRs: 0,
                 totalPhotos: 0,
               });
-              Alert.alert("Success", "All workout data has been cleared");
+              Alert.alert(
+                "Success",
+                "All workout data has been cleared. You will need to complete onboarding again on next login."
+              );
             } catch (error) {
               console.error("Error clearing data:", error);
               Alert.alert("Error", "Failed to clear data");
