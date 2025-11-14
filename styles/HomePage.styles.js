@@ -273,4 +273,20 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#2a2a2a",
   },
+  quoteCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    gap: 12,
+  },
+  quoteText: {
+    flex: 1,
+    fontSize: 14,
+    fontStyle: "italic",
+    color: "#aaa",
+  },
 });

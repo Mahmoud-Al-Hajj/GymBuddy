@@ -53,6 +53,23 @@ function HomePage({ navigation }) {
     }, [])
   );
 
+  const getDailyQuote = () => {
+    const quotes = [
+      "The only bad workout is the one you didn't do",
+      "Stronger than yesterday",
+      "Your body can stand almost anything. It's your mind you have to convince",
+      "Progress, not perfection hbb",
+      "Sore today, strong tomorrow",
+      "Make yourself proud",
+      "The pain you feel today will be the strength you feel tomorrow",
+      "Push yourself because no one else is going to do it for you",
+      "Who will keep your family safe if you don't?",
+      "Don't limit your challenges. Challenge your limits.",
+    ];
+    const day = new Date().getDate();
+    return quotes[day % quotes.length];
+  };
+
   const loadDefaultValues = async () => {
     try {
       const defaultSets = await AsyncStorage.getItem("defaultSets");
@@ -434,6 +451,11 @@ function HomePage({ navigation }) {
           label="Photos"
           color="#4CAF50"
         />
+      </View>
+
+      <View style={styles.quoteCard}>
+        <MaterialIcons name="format-quote" size={20} color={Colors.primary} />
+        <Text style={styles.quoteText}>{getDailyQuote()}</Text>
       </View>
 
       <View style={styles.workoutsHeader}>
