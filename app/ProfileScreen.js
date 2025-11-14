@@ -274,24 +274,54 @@ function ProfilePage({ navigation }) {
     const prCount = stats.totalPRs;
 
     return [
-      { id: 1, name: "First Step", icon: "👣", unlocked: workoutCount >= 1 },
+      {
+        id: 1,
+        name: "First Step",
+        icon: "directions-walk",
+        unlocked: workoutCount >= 1,
+      },
       {
         id: 2,
         name: "Getting Started",
-        icon: "💪",
+        icon: "fitness-center",
         unlocked: workoutCount >= 3,
       },
-      { id: 3, name: "Committed", icon: "🔥", unlocked: workoutCount >= 5 },
-      { id: 4, name: "Gym Rat", icon: "🐀", unlocked: workoutCount >= 7 },
-      { id: 5, name: "L Ossa Kella", icon: "🦁", unlocked: workoutCount >= 10 },
-      { id: 6, name: "PR King", icon: "👑", unlocked: prCount >= 10 },
+      {
+        id: 3,
+        name: "Committed",
+        icon: "local-fire-department",
+        unlocked: workoutCount >= 5,
+      },
+      {
+        id: 4,
+        name: "Gym Rat",
+        icon: "pets",
+        unlocked: workoutCount >= 7,
+      },
+      {
+        id: 5,
+        name: "L Ossa Kella",
+        icon: "emoji-events",
+        unlocked: workoutCount >= 10,
+      },
+      {
+        id: 6,
+        name: "PR King",
+        icon: "military-tech",
+        unlocked: prCount >= 10,
+      },
       {
         id: 7,
         name: "Photographer",
-        icon: "📸",
+        icon: "photo-camera",
         unlocked: stats.totalPhotos >= 5,
       },
-      { id: 8, name: "Legend", icon: "⭐", unlocked: workoutCount >= 15 },
+      {
+        id: 8,
+        name: "Legend",
+        icon: "star",
+        unlocked: workoutCount >= 15,
+      },
     ];
   };
 
@@ -342,8 +372,19 @@ function ProfilePage({ navigation }) {
                     !achievement.unlocked && styles.achievementLocked,
                   ]}
                 >
-                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                  <Text style={styles.achievementName}>{achievement.name}</Text>
+                  <MaterialIcons
+                    name={achievement.icon}
+                    size={32}
+                    color={achievement.unlocked ? "#FFD700" : "#888"}
+                  />
+                  <Text
+                    style={[
+                      styles.achievementName,
+                      !achievement.unlocked && styles.achievementNameLocked,
+                    ]}
+                  >
+                    {achievement.name}
+                  </Text>
                 </View>
               ))}
             </View>
