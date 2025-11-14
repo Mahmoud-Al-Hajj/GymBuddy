@@ -1,0 +1,204 @@
+import { StyleSheet } from "react-native";
+import { Colors } from "../constants/colors.js";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0a0a0a",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 12,
+  },
+  achievementsSection: {
+    marginBottom: 20,
+  },
+  achievementTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 12,
+  },
+  achievementsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  achievementBadge: {
+    width: 90,
+    height: 90,
+    backgroundColor: Colors.primary + "30",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  achievementLocked: {
+    backgroundColor: "#2a2a2a",
+    borderColor: "#444",
+    opacity: 0.5,
+  },
+  achievementIcon: {
+    fontSize: 32,
+    marginBottom: 4,
+  },
+  achievementName: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "center",
+  },
+  dangerSection: {
+    marginTop: 8,
+    gap: 12,
+  },
+  dangerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#ff444420",
+  },
+  dangerButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ff4444",
+  },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: "#ff4444",
+    borderRadius: 12,
+    padding: 16,
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#1a1a1a",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "60%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    textTransform: "capitalize",
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalInput: {
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 16,
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  genderOptions: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  genderOption: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  genderOptionActive: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + "20",
+  },
+  genderOptionText: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "600",
+  },
+  genderOptionTextActive: {
+    color: Colors.primary,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  achievementContainer: {
+    alignItems: "center",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  trophyAnimation: {
+    width: 140,
+    height: 140,
+  },
+  achievementText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFD700",
+    marginTop: 12,
+  },
+});

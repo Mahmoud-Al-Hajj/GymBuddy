@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   Keyboard,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { Colors } from "../constants/colors.js";
+import { styles } from "../styles/Onboarding.styles.js";
 
 function Onboarding({ navigation }) {
   const router = useRouter();
@@ -235,171 +235,5 @@ function Onboarding({ navigation }) {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1a1a1a",
-    paddingTop: 60,
-  },
-  content: {
-    flex: 1,
-  },
-  progressBar: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 40,
-  },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#333",
-  },
-  progressDotActive: {
-    backgroundColor: Colors.primary,
-  },
-  screenContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  optionsContainer: {
-    flex: 1,
-    justifyContent: "center",
-    gap: 24,
-    width: "100%",
-  },
-  genderButton: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  genderButtonActive: {
-    backgroundColor: Colors.primary,
-  },
-  genderText: {
-    color: "#666",
-    fontSize: 16,
-    marginTop: 8,
-    fontWeight: "600",
-  },
-  genderTextActive: {
-    color: "#fff",
-  },
-
-  scrollContent: {
-    paddingVertical: 100,
-    alignItems: "center",
-    marginTop: -70,
-  },
-  ageText: {
-    fontSize: 32,
-    color: "#444",
-    fontWeight: "600",
-    paddingVertical: 8,
-  },
-  ageTextActive: {
-    fontSize: 48,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-
-  weightInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 120,
-    gap: 30,
-  },
-  weightDisplay: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    backgroundColor: "#2a2a2a",
-    paddingHorizontal: 30,
-    paddingVertical: 16,
-    borderRadius: 16,
-    minWidth: 140,
-    justifyContent: "center",
-  },
-  weightInput: {
-    fontSize: 42,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-    minWidth: 80,
-  },
-  weightUnit: {
-    fontSize: 18,
-    color: "#888",
-    marginLeft: 6,
-  },
-  weightButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  weightButtonText: {
-    fontSize: 28,
-    color: "#000",
-    fontWeight: "bold",
-  },
-
-  navigationContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  backButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#2a2a2a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nextButton: {
-    flex: 1,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  nextButtonDisabled: {
-    backgroundColor: "#333",
-    opacity: 0.5,
-  },
-  nextButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-});
 
 export default Onboarding;
