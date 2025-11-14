@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
-import LottieView from "lottie-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -46,7 +45,6 @@ function HomePage({ navigation }) {
     loadDefaultValues();
   }, []);
 
-  // Reload workouts when screen comes into focus (e.g., after clearing data in Profile)
   useFocusEffect(
     useCallback(() => {
       loadWorkouts();
@@ -486,15 +484,11 @@ function HomePage({ navigation }) {
           <View style={styles.emptyState}>
             {!searchQuery ? (
               <>
-                <LottieView
-                  source={require("../assets/animations/Sloth sleeping.json")}
-                  autoPlay
-                  loop
-                  style={styles.lazyAnimation}
-                />
                 <Text style={styles.emptyText}>Someone's been lazy....</Text>
-                <Text style={styles.emptySubText}>
-                  Even this sloth works out more than you!
+
+                <Text style={styles.motivationalQuote}>
+                  "He who is scared of climbing mountains lives among hills
+                  forever."
                 </Text>
               </>
             ) : (

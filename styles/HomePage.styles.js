@@ -78,10 +78,15 @@ export const styles = StyleSheet.create({
     color: "#666",
     marginTop: 16,
   },
-  emptySubText: {
-    fontSize: 14,
-    color: "#444",
-    marginTop: 8,
+
+  motivationalQuote: {
+    fontSize: 16,
+    fontStyle: "italic",
+    color: Colors.primary,
+    textAlign: "center",
+    marginTop: 24,
+    paddingHorizontal: 20,
+    lineHeight: 24,
   },
   modalOverlay: {
     flex: 1,
