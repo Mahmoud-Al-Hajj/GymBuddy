@@ -49,7 +49,7 @@ Key Features
 ### Profile
 | Profile | Profile |
 |:------------:|:------------:|
-| <img src="https://github.com/user-attachments/assets/d90b99d1-963b-4742-b097-b6911b6b7484" width="200"/> | <img src="https://github.com/user-attachments/assets/83925b2b-0b4d-4e5a-bc48-52ec641fa72d" width="200"/> |
+| <img src="https://github.com/user-attachments/assets/d7a549c5-854d-4644-9f45-1361f0ae627b" width="200"/> | <img src="https://github.com/user-attachments/assets/83925b2b-0b4d-4e5a-bc48-52ec641fa72d" width="200"/> |
 
 ### Settings
 | Settings |
