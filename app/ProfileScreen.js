@@ -290,27 +290,38 @@ function ProfilePage({ navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
+              // Clear all data
               await AsyncStorage.removeItem("workouts");
               await SecureStore.deleteItemAsync("userGender");
               await SecureStore.deleteItemAsync("userAge");
               await SecureStore.deleteItemAsync("userWeight");
+              await SecureStore.deleteItemAsync("userHeight");
               await SecureStore.deleteItemAsync("onboardingCompleted");
               await SecureStore.deleteItemAsync("profilePhotoUri");
 
+              // Reset all state immediately
               setProfilePhotoUri("");
               setGender("male");
               setAge("");
               setWeight("");
+              setHeight("");
               setStats({
-                ...stats,
                 totalWorkouts: 0,
                 totalPRs: 0,
                 totalPhotos: 0,
+                memberSince: stats.memberSince,
               });
-              Alert.alert(
-                "Success",
-                "All workout data has been cleared. You will need to complete onboarding again on next login."
-              );
+
+              // Navigate back to home to trigger reload
+              navigation.goBack();
+
+              // Show alert after short delay
+              setTimeout(() => {
+                Alert.alert(
+                  "Success",
+                  "All workout data has been cleared. You will need to complete onboarding again on next login."
+                );
+              }, 100);
             } catch (error) {
               console.error("Error clearing data:", error);
               Alert.alert("Error", "Failed to clear data");

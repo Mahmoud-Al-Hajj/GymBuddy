@@ -33,8 +33,6 @@ function Onboarding({ navigation }) {
         );
         await SecureStore.setItemAsync("onboardingCompleted", "true");
 
-        alert("Profile setup complete!");
-
         navigation.reset({
           index: 0,
           routes: [{ name: "Home" }],

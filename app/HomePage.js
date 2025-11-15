@@ -127,9 +127,12 @@ function HomePage({ navigation }) {
       const storedWorkouts = await AsyncStorage.getItem("workouts");
       if (storedWorkouts) {
         setWorkouts(JSON.parse(storedWorkouts));
+      } else {
+        setWorkouts([]);
       }
     } catch (error) {
       console.error("Error loading workouts:", error);
+      setWorkouts([]);
     }
   };
 
