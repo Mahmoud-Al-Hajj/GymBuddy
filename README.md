@@ -3,7 +3,7 @@
 A React Native mobile application designed to help fitness enthusiasts track their workouts, monitor progress, and achieve their fitness goals. Built with Expo and modern React Native technologies. 
 GymBuddy is a feature-rich workout tracking application that empowers users to log exercises, track personal records, monitor body metrics, and visualize their fitness journey through progress photos. The app combines intuitive design with powerful functionality to create a seamless workout tracking experience.
 
-Key Features
+## Key Features
 
 ### Workout Management
 - **Create Custom Workouts**: Build personalized workout routines with multiple exercises
@@ -54,7 +54,7 @@ Key Features
 ### Settings
 | Settings |
 |:--------:|
-| <img src="https://github.com/user-attachments/assets/f2a47247-9439-4ce8-b2fe-89d268b90c3e" width="200"/> |
+| <img src="https://github.com/user-attachments/assets/9fe5ef31-f6c6-43e5-b553-147bb01fd761" width="200"/> |
 
 ###  Progress Photos
 
