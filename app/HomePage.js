@@ -48,6 +48,7 @@ function HomePage({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       loadWorkouts();
+      loadDefaultValues();
     }, [])
   );
 
@@ -66,6 +67,19 @@ function HomePage({ navigation }) {
     ];
     const day = new Date().getDate();
     return quotes[day % quotes.length];
+  };
+
+  const convertWeight = (weightInKg) => {
+    if (!weightInKg || weightInKg === 0) return 0;
+    if (weightUnit === "lbs") {
+      return (weightInKg * 2.20462).toFixed(1);
+    }
+    return weightInKg;
+  };
+
+  const displayWeight = (weightInKg) => {
+    const converted = convertWeight(weightInKg);
+    return converted > 0 ? `${converted} ${weightUnit}` : "";
   };
 
   const loadDefaultValues = async () => {
@@ -677,7 +691,7 @@ function HomePage({ navigation }) {
                     <Text style={styles.exerciseDetails}>
                       {exercise.sets} sets × {exercise.reps} reps
                       {exercise.weight > 0 &&
-                        ` • ${exercise.weight} ${weightUnit}`}
+                        ` • ${displayWeight(exercise.weight)}`}
                     </Text>
                   </View>
 
@@ -760,7 +774,7 @@ function HomePage({ navigation }) {
                     <View key={pb.id} style={styles.pbCard}>
                       <Text style={styles.pbExercise}>{pb.exerciseName}</Text>
                       <Text style={styles.pbDetails}>
-                        {pb.weight} {weightUnit} × {pb.reps} reps
+                        {displayWeight(pb.weight)} × {pb.reps} reps
                       </Text>
                       <Text style={styles.pbDate}>{formatDate(pb.date)}</Text>
                     </View>

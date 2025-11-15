@@ -27,6 +27,7 @@ function ProfilePage({ navigation }) {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [profilePhotoUri, setProfilePhotoUri] = useState("");
+  const [weightUnit, setWeightUnit] = useState("kg");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState("");
@@ -43,8 +44,8 @@ function ProfilePage({ navigation }) {
     requestPermission();
     loadUserData();
     loadWorkoutStats();
+    loadWeightUnit();
   }, []);
-
   const requestPermission = async () => {
     const { granted } = await ImagePicker.requestCameraPermissionsAsync();
     if (!granted) {
@@ -86,6 +87,23 @@ function ProfilePage({ navigation }) {
         },
       ]
     );
+  };
+
+  const loadWeightUnit = async () => {
+    try {
+      const savedUnit = await AsyncStorage.getItem("weightUnit");
+      if (savedUnit) setWeightUnit(savedUnit);
+    } catch (error) {
+      console.error("Error loading weight unit:", error);
+    }
+  };
+
+  const convertWeight = (weightInKg) => {
+    if (!weightInKg) return "Not set";
+    if (weightUnit === "lbs") {
+      return `${(parseFloat(weightInKg) * 2.20462).toFixed(1)} lbs`;
+    }
+    return `${weightInKg} kg`;
   };
 
   const loadUserData = async () => {
@@ -482,7 +500,7 @@ function ProfilePage({ navigation }) {
           <InfoRow
             icon="weight"
             label="Weight"
-            value={weight ? `${weight} kg` : "Not set"}
+            value={weight ? convertWeight(weight) : "Not set"}
             onPress={() => openEditModal("weight", weight, "Weight")}
           />
 
