@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
@@ -25,6 +26,7 @@ function ProfilePage({ navigation }) {
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  const [profilePhotoUri, setProfilePhotoUri] = useState("");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState("");
@@ -38,9 +40,35 @@ function ProfilePage({ navigation }) {
   });
 
   useEffect(() => {
+    requestPermission();
     loadUserData();
     loadWorkoutStats();
   }, []);
+
+  const requestPermission = async () => {
+    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+    if (!granted) {
+      Alert.alert(
+        "Permission Required",
+        "You need to enable camera permission to set a profile photo"
+      );
+    }
+  };
+
+  const selectProfileImage = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.5,
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const uri = result.assets[0].uri;
+      setProfilePhotoUri(uri);
+      await SecureStore.setItemAsync("profilePhotoUri", uri);
+    }
+  };
 
   const loadUserData = async () => {
     try {
@@ -50,6 +78,7 @@ function ProfilePage({ navigation }) {
       const userWeight = await SecureStore.getItemAsync("userWeight");
       const userHeight = await SecureStore.getItemAsync("userHeight");
       const memberSince = await SecureStore.getItemAsync("memberSince");
+      const photoUri = await SecureStore.getItemAsync("profilePhotoUri");
 
       if (userEmail) {
         setEmail(userEmail);
@@ -59,6 +88,7 @@ function ProfilePage({ navigation }) {
       if (userAge) setAge(userAge);
       if (userWeight) setWeight(userWeight);
       if (userHeight) setHeight(userHeight);
+      if (photoUri) setProfilePhotoUri(photoUri);
 
       if (!memberSince) {
         const joinDate = new Date().toISOString();
@@ -354,6 +384,8 @@ function ProfilePage({ navigation }) {
           email={email}
           gender={gender}
           memberSince={stats.memberSince}
+          profilePhotoUri={profilePhotoUri}
+          onSelectImage={selectProfileImage}
         />
 
         {/* Stats Grid */}

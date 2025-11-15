@@ -1,19 +1,41 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../constants/colors.js";
 
-function ProfileCard({ username, email, gender, memberSince }) {
+function ProfileCard({
+  username,
+  email,
+  gender,
+  memberSince,
+  profilePhotoUri,
+  onSelectImage,
+}) {
   return (
     <View style={styles.profileCard}>
       <View style={styles.avatarContainer}>
-        <View style={styles.avatar}>
-          <MaterialCommunityIcons
-            name={gender === "male" ? "face-man-profile" : "face-woman-profile"}
-            size={48}
-            color={Colors.primary}
-          />
-        </View>
+        <TouchableOpacity style={styles.avatar} onPress={onSelectImage}>
+          {profilePhotoUri ? (
+            <Image
+              source={{ uri: profilePhotoUri }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <MaterialCommunityIcons
+              name={
+                gender === "male" ? "face-man-profile" : "face-woman-profile"
+              }
+              size={48}
+              color={Colors.primary}
+            />
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editIconContainer}
+          onPress={onSelectImage}
+        >
+          <MaterialCommunityIcons name="camera" size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
       <Text style={styles.profileName}>{username}</Text>
       <Text style={styles.profileEmail}>{email}</Text>
@@ -32,6 +54,7 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 16,
+    position: "relative",
   },
   avatar: {
     width: 100,
@@ -42,6 +65,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: Colors.primary,
+    overflow: "hidden",
+  },
+  profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 50,
+  },
+  editIconContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.primary,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#1a1a1a",
   },
   profileName: {
     fontSize: 24,
