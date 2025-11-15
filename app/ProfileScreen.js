@@ -250,7 +250,6 @@ function ProfilePage({ navigation }) {
       }
 
       setShowEditModal(false);
-      Alert.alert("Success", "Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Failed to update profile");
@@ -296,7 +295,12 @@ function ProfilePage({ navigation }) {
               await SecureStore.deleteItemAsync("userAge");
               await SecureStore.deleteItemAsync("userWeight");
               await SecureStore.deleteItemAsync("onboardingCompleted");
+              await SecureStore.deleteItemAsync("profilePhotoUri");
 
+              setProfilePhotoUri("");
+              setGender("male");
+              setAge("");
+              setWeight("");
               setStats({
                 ...stats,
                 totalWorkouts: 0,

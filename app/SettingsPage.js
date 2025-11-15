@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -16,12 +15,10 @@ import { styles } from "../styles/SettingsPage.styles.js";
 
 function SettingsPage({ navigation }) {
   const [weightUnit, setWeightUnit] = useState("kg");
-  const [defaultSets, setDefaultSets] = useState("");
-  const [defaultReps, setDefaultReps] = useState("");
+  const [defaultSets, setDefaultSets] = useState(3);
+  const [defaultReps, setDefaultReps] = useState(10);
   const [restTimer, setRestTimer] = useState("");
 
-  const [showSetsModal, setShowSetsModal] = useState(false);
-  const [showRepsModal, setShowRepsModal] = useState(false);
   const [showRestTimerModal, setShowRestTimerModal] = useState(false);
   const [tempValue, setTempValue] = useState("");
 
@@ -42,10 +39,10 @@ function SettingsPage({ navigation }) {
         setWeightUnit(settings.weightUnit);
       }
       if (settings.defaultSets !== null) {
-        setDefaultSets(settings.defaultSets);
+        setDefaultSets(parseInt(settings.defaultSets));
       }
       if (settings.defaultReps !== null) {
-        setDefaultReps(settings.defaultReps);
+        setDefaultReps(parseInt(settings.defaultReps));
       }
       if (settings.restTimer !== null) {
         setRestTimer(settings.restTimer);
@@ -78,28 +75,36 @@ function SettingsPage({ navigation }) {
     );
   };
 
-  const handleSaveSets = async () => {
-    if (!tempValue || parseInt(tempValue) < 1 || parseInt(tempValue) > 20) {
-      Alert.alert("Invalid Input", "Please enter a number between 1 and 20");
-      return;
+  const incrementSets = async () => {
+    if (defaultSets < 20) {
+      const newValue = defaultSets + 1;
+      setDefaultSets(newValue);
+      await saveSetting("defaultSets", newValue.toString());
     }
-
-    setDefaultSets(tempValue);
-    await saveSetting("defaultSets", tempValue);
-    setShowSetsModal(false);
-    Alert.alert("Success", `Default sets set to ${tempValue}`);
   };
 
-  const handleSaveReps = async () => {
-    if (!tempValue || parseInt(tempValue) < 1 || parseInt(tempValue) > 100) {
-      Alert.alert("Invalid Input", "Please enter a number between 1 and 100");
-      return;
+  const decrementSets = async () => {
+    if (defaultSets > 1) {
+      const newValue = defaultSets - 1;
+      setDefaultSets(newValue);
+      await saveSetting("defaultSets", newValue.toString());
     }
+  };
 
-    setDefaultReps(tempValue);
-    await saveSetting("defaultReps", tempValue);
-    setShowRepsModal(false);
-    Alert.alert("Success", `Default reps set to ${tempValue}`);
+  const incrementReps = async () => {
+    if (defaultReps < 100) {
+      const newValue = defaultReps + 1;
+      setDefaultReps(newValue);
+      await saveSetting("defaultReps", newValue.toString());
+    }
+  };
+
+  const decrementReps = async () => {
+    if (defaultReps > 1) {
+      const newValue = defaultReps - 1;
+      setDefaultReps(newValue);
+      await saveSetting("defaultReps", newValue.toString());
+    }
   };
 
   const handleSaveRestTimer = async () => {
@@ -116,29 +121,6 @@ function SettingsPage({ navigation }) {
 
   const handleEditProfile = () => {
     navigation.navigate("Profile");
-  };
-
-  const handleClearData = () => {
-    Alert.alert(
-      "Clear All Data",
-      "This will permanently delete all your workouts, photos, and personal records. This cannot be undone!",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete Everything",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem("workouts");
-              Alert.alert("Success", "All workout data has been cleared");
-            } catch (error) {
-              console.error("Error clearing data:", error);
-              Alert.alert("Error", "Failed to clear data");
-            }
-          },
-        },
-      ]
-    );
   };
 
   const handleResetSettings = () => {
@@ -158,37 +140,14 @@ function SettingsPage({ navigation }) {
 
             // Reset to defaults
             setWeightUnit("kg");
-            setDefaultSets("");
-            setDefaultReps("");
+            setDefaultSets(3);
+            setDefaultReps(12);
             setRestTimer("");
 
             Alert.alert("Success", "Settings reset to defaults");
           } catch (error) {
             console.error("Error resetting settings:", error);
             Alert.alert("Error", "Failed to reset settings");
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await SecureStore.deleteItemAsync("userToken");
-            await SecureStore.deleteItemAsync("userEmail");
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          } catch (error) {
-            console.error("Error logging out:", error);
-            Alert.alert("Error", "Failed to logout");
           }
         },
       },
@@ -295,13 +254,7 @@ function SettingsPage({ navigation }) {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => {
-              setTempValue(defaultSets);
-              setShowSetsModal(true);
-            }}
-          >
+          <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <MaterialCommunityIcons
                 name="counter"
@@ -313,19 +266,24 @@ function SettingsPage({ navigation }) {
                 <Text style={styles.settingSubtext}>For new exercises</Text>
               </View>
             </View>
-            <View style={styles.valueContainer}>
-              <Text style={styles.valueText}>{defaultSets}</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            <View style={styles.counterContainer}>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={decrementSets}
+              >
+                <MaterialIcons name="remove" size={20} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.counterValue}>{defaultSets}</Text>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={incrementSets}
+              >
+                <MaterialIcons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => {
-              setTempValue(defaultReps);
-              setShowRepsModal(true);
-            }}
-          >
+          <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <MaterialCommunityIcons
                 name="repeat"
@@ -337,11 +295,22 @@ function SettingsPage({ navigation }) {
                 <Text style={styles.settingSubtext}>For new exercises</Text>
               </View>
             </View>
-            <View style={styles.valueContainer}>
-              <Text style={styles.valueText}>{defaultReps}</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            <View style={styles.counterContainer}>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={decrementReps}
+              >
+                <MaterialIcons name="remove" size={20} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.counterValue}>{defaultReps}</Text>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={incrementReps}
+              >
+                <MaterialIcons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={styles.settingRow}
@@ -421,24 +390,6 @@ function SettingsPage({ navigation }) {
       </ScrollView>
 
       {/* Modals */}
-      <SettingModal
-        visible={showSetsModal}
-        onClose={() => setShowSetsModal(false)}
-        title="Default Sets"
-        value={defaultSets}
-        onSave={handleSaveSets}
-        placeholder="Enter number of sets (1-20)"
-      />
-
-      <SettingModal
-        visible={showRepsModal}
-        onClose={() => setShowRepsModal(false)}
-        title="Default Reps"
-        value={defaultReps}
-        onSave={handleSaveReps}
-        placeholder="Enter number of reps (1-100)"
-      />
-
       <SettingModal
         visible={showRestTimerModal}
         onClose={() => setShowRestTimerModal(false)}

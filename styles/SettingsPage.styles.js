@@ -81,6 +81,26 @@ export const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: "600",
   },
+  counterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  counterButton: {
+    backgroundColor: Colors.primary,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  counterValue: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold",
+    minWidth: 40,
+    textAlign: "center",
+  },
   versionText: {
     fontSize: 14,
     color: "#888",
