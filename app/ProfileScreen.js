@@ -70,6 +70,24 @@ function ProfilePage({ navigation }) {
     }
   };
 
+  const removeProfileImage = async () => {
+    Alert.alert(
+      "Remove Photo",
+      "Are you sure you want to remove your profile photo?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            setProfilePhotoUri("");
+            await SecureStore.deleteItemAsync("profilePhotoUri");
+          },
+        },
+      ]
+    );
+  };
+
   const loadUserData = async () => {
     try {
       const userEmail = await SecureStore.getItemAsync("userEmail");
@@ -386,6 +404,7 @@ function ProfilePage({ navigation }) {
           memberSince={stats.memberSince}
           profilePhotoUri={profilePhotoUri}
           onSelectImage={selectProfileImage}
+          onRemoveImage={removeProfileImage}
         />
 
         {/* Stats Grid */}

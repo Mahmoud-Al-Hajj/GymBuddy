@@ -10,6 +10,7 @@ function ProfileCard({
   memberSince,
   profilePhotoUri,
   onSelectImage,
+  onRemoveImage,
 }) {
   return (
     <View style={styles.profileCard}>
@@ -40,6 +41,12 @@ function ProfileCard({
       <Text style={styles.profileName}>{username}</Text>
       <Text style={styles.profileEmail}>{email}</Text>
       <Text style={styles.memberSince}>Member since {memberSince}</Text>
+      {profilePhotoUri && (
+        <TouchableOpacity style={styles.removeButton} onPress={onRemoveImage}>
+          <MaterialCommunityIcons name="delete" size={18} color="#ff4444" />
+          <Text style={styles.removeButtonText}>Remove Photo</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -84,6 +91,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#1a1a1a",
+  },
+  removeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ff4444",
+  },
+  removeButtonText: {
+    color: "#ff4444",
+    fontSize: 14,
+    marginLeft: 6,
+    fontWeight: "500",
   },
   profileName: {
     fontSize: 24,
