@@ -1,4 +1,4 @@
-import WorkoutService from "../services/WorkoutService";
+import WorkoutService from "../services/WorkoutService.js";
 
 class WorkoutController {
   constructor() {
