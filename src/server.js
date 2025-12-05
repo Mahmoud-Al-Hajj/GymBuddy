@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-//app.use("/api");
+app.use("/api", authRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

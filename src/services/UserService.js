@@ -1,19 +1,10 @@
 import prisma from "../../prisma/prisma.js";
+import AuthService from "./AuthService.js";
 
 class UserService {
-  static async getUserById(userId) {
+  async getUserById(userId) {
     return await prisma.users.findUnique({
       where: { id: userId },
-    });
-  }
-
-  static async createUser(username, email, password) {
-    return await prisma.users.create({
-      data: {
-        username: username,
-        email: email,
-        password: password,
-      },
     });
   }
 
@@ -24,7 +15,7 @@ class UserService {
     });
   }
 
-  static async deleteUser(id) {
+  async deleteUser(id) {
     return prisma.users.delete({
       where: { id: parseInt(id) },
     });
