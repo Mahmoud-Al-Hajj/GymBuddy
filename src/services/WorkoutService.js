@@ -47,11 +47,7 @@ class WorkoutService {
   async getWorkoutById(workoutId) {
     return prisma.workouts.findUnique({
       where: { id: workoutId },
-      include: {
-        exercises: true,
-        personal_bests: true,
-        progress_photos: true,
-      },
+      include: { exercises: true },
     });
   }
 

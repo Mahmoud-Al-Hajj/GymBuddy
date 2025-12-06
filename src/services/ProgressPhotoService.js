@@ -5,7 +5,7 @@ class ProgressPhotoService {
     return prisma.progress_photos.create({
       data: {
         user_id: userId,
-        workout_id: workoutId,
+        workout_id: Number(workoutId),
         image_url: imageUrl,
       },
     });

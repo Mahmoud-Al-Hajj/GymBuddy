@@ -1,4 +1,5 @@
 import ProgressPhotoService from "../services/ProgressPhotoService.js";
+import { uploadProgressPhoto } from "../utils/upload.js";
 
 class ProgressPhotoController {
   constructor() {
@@ -8,7 +9,21 @@ class ProgressPhotoController {
   async addProgressPhoto(req, res) {
     try {
       const userId = req.user.id;
-      const { workoutId, imageUrl } = req.body;
+      const { workoutId } = req.body;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      if (!workoutId) {
+        return res.status(400).json({ error: "workoutId is required" });
+      }
+
+      // Upload to Supabase Storage
+      const imageUrl = await uploadProgressPhoto(file);
+
+      // Save to database with image URL
       const photo = await this.progressPhotoService.addProgressPhoto(
         userId,
         workoutId,
@@ -32,8 +47,8 @@ class ProgressPhotoController {
 
   async deleteProgressPhoto(req, res) {
     try {
-      const { id } = req.params;
-      await this.progressPhotoService.deleteProgressPhoto(parseInt(id));
+      const userId = req.user.id;
+      await this.progressPhotoService.deleteProgressPhoto(userId);
       res.status(204).send();
     } catch (error) {
       res.status(400).json({ error: error.message });
