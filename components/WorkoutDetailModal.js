@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../../styles/HomePage.styles";
 import { formatDate } from "../../utils/workoutHelpers";
@@ -16,6 +16,7 @@ export const WorkoutDetailModal = ({
   onEditExercise,
   onMarkPersonalBest,
   onAddExercise,
+  onAddPhoto,
   exerciseName,
   setExerciseName,
   sets,
@@ -45,6 +46,16 @@ export const WorkoutDetailModal = ({
               </Text>
             </View>
             <View style={styles.modalHeaderButtons}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => onAddPhoto(workout.id)}
+              >
+                <MaterialCommunityIcons
+                  name="camera-plus"
+                  size={24}
+                  color="#fff"
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => onDeleteWorkout(workout.id)}

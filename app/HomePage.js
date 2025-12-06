@@ -12,12 +12,11 @@ import { useUserPreferences } from "../hooks/useUserPreferences";
 import { useWorkouts } from "../hooks/useWorkouts";
 
 // Components
+import { AddWorkoutModal } from "../components/AddWorkoutModal";
 import SearchBar from "../components/SearchBar";
 import StatCard from "../components/StatCard";
 import WorkoutCard from "../components/WorkoutCard";
-import { AddWorkoutModal } from "../components/modals/AddWorkoutModal";
-import { EditExerciseModal } from "../components/modals/EditExerciseModal";
-import { WorkoutDetailModal } from "../components/modals/WorkoutDetailModal";
+import { WorkoutDetailModal } from "../components/WorkoutDetailModal";
 
 // Utils
 import { Colors } from "../constants/colors";
@@ -41,7 +40,8 @@ function HomePage({ navigation }) {
     useExercises();
   const { personalBests, loadPersonalBests, addPersonalBest } =
     usePersonalBests();
-  const { progressPhotos, loadProgressPhotos } = useProgressPhotos();
+  const { progressPhotos, loadProgressPhotos, addProgressPhoto } =
+    useProgressPhotos();
   const {
     userName,
     weightUnit,
@@ -251,6 +251,17 @@ function HomePage({ navigation }) {
     }
   };
 
+  const handleAddPhoto = async (workoutId) => {
+    try {
+      await addProgressPhoto();
+      await refreshWorkoutDetail(workoutId);
+      Alert.alert("Success", "Photo added successfully!");
+    } catch (error) {
+      console.error("Error adding photo:", error);
+      Alert.alert("Error", "Failed to add photo");
+    }
+  };
+
   const resetForm = () => {
     setWorkoutName("");
     resetExerciseForm();
@@ -397,25 +408,7 @@ function HomePage({ navigation }) {
         }}
         onMarkPersonalBest={handleMarkPersonalBest}
         onAddExercise={handleAddExercise}
-        exerciseName={exerciseName}
-        setExerciseName={setExerciseName}
-        sets={sets}
-        setSets={setSets}
-        reps={reps}
-        setReps={setReps}
-        weight={weight}
-        setWeight={setWeight}
-        weightUnit={weightUnit}
-      />
-
-      <EditExerciseModal
-        visible={showEditExercise}
-        onClose={() => setShowEditExercise(false)}
-        onSave={handleSaveEditExercise}
-        onDelete={() => {
-          setShowEditExercise(false);
-          handleDeleteExercise(selectedWorkout?.id, selectedExercise?.id);
-        }}
+        onAddPhoto={handleAddPhoto}
         exerciseName={exerciseName}
         setExerciseName={setExerciseName}
         sets={sets}
