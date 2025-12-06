@@ -11,16 +11,21 @@ function Button({
 }) {
   const isPrimary = variant === "primary";
 
-  const buttonStyle = {
+  const baseStyle = {
     backgroundColor: isPrimary ? Colors.primary : "transparent",
     borderColor: Colors.primary,
-    ...style,
+    borderWidth: isPrimary ? 0 : 2,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   };
 
   const finalTextStyle = {
     color: isPrimary ? "white" : Colors.primary,
     fontSize: 16,
-    ...(textStyle?.fontFamily ? {} : { fontWeight: "600" }), // Only add fontWeight if no custom font
+    ...(textStyle?.fontFamily ? {} : { fontWeight: "600" }),
     ...textStyle,
   };
 
@@ -28,11 +33,16 @@ function Button({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      style={buttonStyle}
       activeOpacity={0.7}
+      style={[
+        baseStyle, // default button styling
+        style, // custom styles you pass in
+        disabled && { opacity: 0.6 }, // disabled styling
+      ]}
     >
       <Text style={finalTextStyle}>{label}</Text>
     </TouchableOpacity>
   );
 }
+
 export default Button;

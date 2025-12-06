@@ -55,20 +55,27 @@ export const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    borderRadius: 8,
-    alignSelf: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 162,
     borderRadius: 10,
+    alignSelf: "center",
+
+    width: 350,
+    paddingVertical: 12,
+
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
+
   TextContainer: {
     marginBottom: 55,
   },
   textStyle: {
-    fontSize: 17,
+    fontSize: 16,
+    fontWeight: "600",
     textAlign: "center",
     color: "black",
   },
+
   buttonDisabled: {
     opacity: 0.6,
   },

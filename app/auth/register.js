@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { Formik } from "formik";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ImageBackground,
   Keyboard,
@@ -15,10 +16,13 @@ import * as Yup from "yup";
 import Button from "../../components/Button.js";
 import TextInput from "../../components/TextInput.js";
 import { Colors } from "../../constants/colors.js";
-import { styles } from "../../styles/login.styles.js";
+import { styles } from "../../styles/register.styles.js";
 import { authAPI } from "../../utils/api.js";
 
-const loginValidationSchema = Yup.object().shape({
+const registerValidationSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(3, "Username must be at least 3 characters")
+    .required("Username is required"),
   email: Yup.string()
     .email("Invalid email format")
     .required("Email is required"),
@@ -27,43 +31,55 @@ const loginValidationSchema = Yup.object().shape({
     .required("Password is required"),
 });
 
-function Login({ navigation }) {
+function Register({ navigation }) {
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (values) => {
+  const handleRegister = async (values) => {
     setLoading(true);
 
     try {
-      const response = await authAPI.login(values.email, values.password);
+      console.log("Register values:", values);
+      const trimmedEmail = values.email.trim();
+      const trimmedPassword = values.password.trim();
+      const trimmedUsername = values.username.trim();
 
-      if (response.ok && response.data.success) {
-        const { token, user } = response.data.data;
+      console.log("📤 Sending to API:", {
+        email: trimmedEmail,
+        password: trimmedPassword,
+        username: trimmedUsername,
+      });
 
+      const response = await authAPI.register(
+        trimmedEmail,
+        trimmedPassword,
+        trimmedUsername
+      );
+      if (response.ok && response.data?.token && response.data?.user) {
+        const { token, user } = response.data;
+
+        // Save token and email
         await SecureStore.setItemAsync("userToken", token);
         await SecureStore.setItemAsync("userEmail", user.email);
 
-        const onboardingCompleted = await SecureStore.getItemAsync(
-          "onboardingCompleted"
-        );
-
-        if (onboardingCompleted === "true") {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Home" }],
-          });
-        } else {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Onboarding" }],
-          });
-        }
+        Alert.alert("Success", "Account created successfully!", [
+          {
+            text: "OK",
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Onboarding" }],
+              });
+            },
+          },
+        ]);
       } else {
         const errorMessage =
-          response.data?.message || "Invalid email or password";
-        Alert.alert("Login Failed", errorMessage);
+          response.data?.error ||
+          response.data?.message ||
+          "Registration failed";
+        Alert.alert("Registration Failed", errorMessage);
       }
     } catch (error) {
-      console.error("Login error:", error);
       Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -90,21 +106,36 @@ function Login({ navigation }) {
 
           <View style={styles.TextContainer}>
             <Text style={styles.title}>
-              Welcome to <Text style={{ color: Colors.primary }}>GymBuddy</Text>
+              Join <Text style={{ color: Colors.primary }}>GymBuddy</Text>
             </Text>
-            <Text style={styles.tagline}>Your Personal Fitness Companion</Text>
             <Text style={styles.subtitle}>
-              Track workouts • Build habits • Achieve goals
+              Create your account and start your fitness journey
             </Text>
           </View>
 
           <Formik
-            initialValues={{ email: "", password: "" }}
-            validationSchema={loginValidationSchema}
-            onSubmit={handleLogin}
+            initialValues={{
+              username: "",
+              email: "",
+              password: "",
+            }}
+            validationSchema={registerValidationSchema}
+            onSubmit={handleRegister}
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
               <View style={styles.formContainer}>
+                <TextInput
+                  label="Username"
+                  placeholder="Choose a username"
+                  placeholderTextColor="#fff"
+                  value={values.username}
+                  onChangeText={handleChange("username")}
+                  onBlur={handleBlur("username")}
+                  error={errors.username}
+                  color={Colors.primary}
+                  editable={!loading}
+                />
+
                 <TextInput
                   label="Email"
                   placeholder="Enter your email"
@@ -120,7 +151,7 @@ function Login({ navigation }) {
 
                 <TextInput
                   label="Password"
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   placeholderTextColor="#fff"
                   value={values.password}
                   onChangeText={handleChange("password")}
@@ -132,12 +163,13 @@ function Login({ navigation }) {
                 />
 
                 <Button
-                  label={loading ? "Logging in..." : "Login"}
+                  label={loading ? "Creating Account..." : "Sign Up"}
                   onPress={handleSubmit}
-                  style={(styles.button, loading && styles.disabled)}
+                  style={[styles.button, loading && styles.buttonDisabled]}
                   textStyle={styles.textStyle}
                   disabled={loading}
                 />
+
                 {loading && (
                   <ActivityIndicator
                     size="small"
@@ -145,14 +177,15 @@ function Login({ navigation }) {
                     style={styles.loader}
                   />
                 )}
+
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("Register")}
+                  onPress={() => navigation.navigate("Login")}
                   style={styles.linkContainer}
                   disabled={loading}
                 >
                   <Text style={styles.linkText}>
-                    Don't have an account?{" "}
-                    <Text style={styles.linkBold}>Register</Text>
+                    Already have an account?{" "}
+                    <Text style={styles.linkBold}>Login</Text>
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -160,9 +193,8 @@ function Login({ navigation }) {
           </Formik>
         </View>
       </TouchableWithoutFeedback>
-      <View />
     </ImageBackground>
   );
 }
 
-export default Login;
+export default Register;

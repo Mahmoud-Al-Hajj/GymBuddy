@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
+  Alert,
   Keyboard,
   ScrollView,
   Text,
@@ -12,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { styles } from "../styles/Onboarding.styles.js";
+import { profileAPI } from "../utils/api.js";
 
 function Onboarding({ navigation }) {
   const router = useRouter();
@@ -25,20 +27,50 @@ function Onboarding({ navigation }) {
       setCurrentStep(currentStep + 1);
     } else {
       try {
-        await SecureStore.setItemAsync("userGender", gender);
-        await SecureStore.setItemAsync("userAge", age.toString());
-        await SecureStore.setItemAsync(
-          "userWeight",
-          (parseInt(weight) || 54).toString()
-        );
-        await SecureStore.setItemAsync("onboardingCompleted", "true");
-
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Home" }],
+        console.log("📤 Updating user profile with:", {
+          gender,
+          age,
+          weight,
         });
+
+        // Call API to update user profile
+        const response = await profileAPI.updateProfile({
+          gender,
+          age: parseInt(age),
+          weight: parseInt(weight) || 54,
+        });
+
+        console.log("✅ Profile update response:", response);
+
+        if (response.ok) {
+          console.log("🎉 Profile updated successfully!");
+
+          // Save to SecureStore as well for offline access
+          await SecureStore.setItemAsync("userGender", gender);
+          await SecureStore.setItemAsync("userAge", age.toString());
+          await SecureStore.setItemAsync(
+            "userWeight",
+            (parseInt(weight) || 54).toString()
+          );
+          await SecureStore.setItemAsync("onboardingCompleted", "true");
+
+          console.log("💾 Saved to SecureStore");
+
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Home" }],
+          });
+        } else {
+          const errorMessage =
+            response.data?.error ||
+            response.data?.message ||
+            "Failed to update profile";
+          console.log("❌ Profile update failed:", errorMessage);
+          Alert.alert("Error", errorMessage);
+        }
       } catch (error) {
-        console.error("Error saving profile:", error);
+        console.error("💥 Error saving profile:", error);
+        Alert.alert("Error", "Something went wrong. Please try again.");
       }
     }
   };
