@@ -43,7 +43,7 @@ class UserController {
 
   async updateUser(req, res) {
     try {
-      const { id } = req.params;
+      const id = req.user.id; // Get from token, not params
       const updateData = req.body;
       const updatedUser = await this.userService.updateUser(id, updateData);
       res.status(200).json(updatedUser);
@@ -54,7 +54,7 @@ class UserController {
 
   async deleteUser(req, res) {
     try {
-      const { id } = req.params;
+      const id = req.user.id; // Get from token, not params
       await this.userService.deleteUser(id);
       res.status(204).send();
     } catch (error) {

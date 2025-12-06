@@ -11,12 +11,12 @@ const registerSchema = Joi.object({
 });
 
 const updateUserSchema = Joi.object({
-  username: Joi.string().min(3).required(),
+  username: Joi.string().min(3).optional(),
   gender: Joi.string().valid("male", "female").optional(),
   age: Joi.number().integer().min(10).max(100).optional(),
   weight: Joi.number().positive().max(180).optional(),
   height: Joi.number().positive().max(250).optional(),
-});
+}).min(1); // At least one field must be provided
 
 const createWorkoutSchema = Joi.object({
   name: Joi.string().required(),
