@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { Formik } from "formik";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ImageBackground,
   Keyboard,
@@ -35,9 +36,10 @@ function Login({ navigation }) {
 
     try {
       const response = await authAPI.login(values.email, values.password);
+      console.log("Login response:", response.data);
 
-      if (response.ok && response.data.success) {
-        const { token, user } = response.data.data;
+      if (response.ok && response.data?.token) {
+        const { token, user } = response.data;
 
         await SecureStore.setItemAsync("userToken", token);
         await SecureStore.setItemAsync("userEmail", user.email);

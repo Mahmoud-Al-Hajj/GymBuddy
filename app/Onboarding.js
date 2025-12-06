@@ -27,12 +27,6 @@ function Onboarding({ navigation }) {
       setCurrentStep(currentStep + 1);
     } else {
       try {
-        console.log("📤 Updating user profile with:", {
-          gender,
-          age,
-          weight,
-        });
-
         // Call API to update user profile
         const response = await profileAPI.updateProfile({
           gender,
@@ -40,12 +34,7 @@ function Onboarding({ navigation }) {
           weight: parseInt(weight) || 54,
         });
 
-        console.log("✅ Profile update response:", response);
-
         if (response.ok) {
-          console.log("🎉 Profile updated successfully!");
-
-          // Save to SecureStore as well for offline access
           await SecureStore.setItemAsync("userGender", gender);
           await SecureStore.setItemAsync("userAge", age.toString());
           await SecureStore.setItemAsync(
@@ -65,11 +54,8 @@ function Onboarding({ navigation }) {
             response.data?.error ||
             response.data?.message ||
             "Failed to update profile";
-          console.log("❌ Profile update failed:", errorMessage);
-          Alert.alert("Error", errorMessage);
         }
       } catch (error) {
-        console.error("💥 Error saving profile:", error);
         Alert.alert("Error", "Something went wrong. Please try again.");
       }
     }

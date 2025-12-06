@@ -33,7 +33,7 @@ export const profileAPI = {
 // ============ WORKOUT APIs ============
 export const workoutAPI = {
   createWorkout: (workoutData) => api.post("/workouts", workoutData),
-  getAllWorkouts: () => api.get("/workouts"),
+  getWorkouts: () => api.get("/workouts"),
   getWorkoutById: (workoutId) => api.get(`/workouts/${workoutId}`),
   updateWorkout: (workoutId, workoutData) =>
     api.put(`/workouts/${workoutId}`, workoutData),
@@ -56,7 +56,7 @@ export const exerciseAPI = {
 export const personalBestAPI = {
   addPersonalBest: (personalBestData) =>
     api.post("/personal-bests", personalBestData),
-  getAllPersonalBests: () => api.get("/personal-bests"),
+  getPersonalBests: () => api.get("/personal-bests"),
   getPersonalBestByExercise: (exerciseName) =>
     api.get(`/personal-bests/exercise/${exerciseName}`),
   deletePersonalBest: (personalBestId) =>
@@ -66,7 +66,7 @@ export const personalBestAPI = {
 // ============ PROGRESS PHOTO APIs ============
 export const progressPhotoAPI = {
   addProgressPhoto: (photoData) => api.post("/progress-photos", photoData),
-  getAllProgressPhotos: () => api.get("/progress-photos"),
+  getProgressPhotos: () => api.get("/progress-photos"),
   deleteProgressPhoto: (photoId) => api.delete(`/progress-photos/${photoId}`),
 };
 

@@ -1,7 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -20,9 +19,17 @@ import StatCard from "../components/StatCard.js";
 import WorkoutCard from "../components/WorkoutCard.js";
 import { Colors } from "../constants/colors.js";
 import { styles } from "../styles/HomePage.styles.js";
+import {
+  exerciseAPI,
+  personalBestAPI,
+  progressPhotoAPI,
+  workoutAPI,
+} from "../utils/api.js";
 
 function HomePage({ navigation }) {
   const [workouts, setWorkouts] = useState([]);
+  const [personalBests, setPersonalBests] = useState([]);
+  const [progressPhotos, setProgressPhotos] = useState([]);
   const [userName, setUserName] = useState("");
   const [showAddWorkout, setShowAddWorkout] = useState(false);
   const [showWorkoutDetail, setShowWorkoutDetail] = useState(false);
@@ -42,12 +49,16 @@ function HomePage({ navigation }) {
     checkOnboardingStatus();
     loadUserData();
     loadWorkouts();
+    loadPersonalBests();
+    loadProgressPhotos();
     loadDefaultValues();
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       loadWorkouts();
+      loadPersonalBests();
+      loadProgressPhotos();
       loadDefaultValues();
     }, [])
   );
@@ -70,11 +81,12 @@ function HomePage({ navigation }) {
   };
 
   const convertWeight = (weightInKg) => {
-    if (!weightInKg || weightInKg === 0) return 0;
+    const weight = parseFloat(weightInKg);
+    if (!weight || weight === 0) return 0;
     if (weightUnit === "lbs") {
-      return (weightInKg * 2.20462).toFixed(1);
+      return (weight * 2.20462).toFixed(1);
     }
-    return weightInKg;
+    return weight;
   };
 
   const displayWeight = (weightInKg) => {
@@ -138,10 +150,14 @@ function HomePage({ navigation }) {
 
   const loadWorkouts = async () => {
     try {
-      const storedWorkouts = await AsyncStorage.getItem("workouts");
-      if (storedWorkouts) {
-        setWorkouts(JSON.parse(storedWorkouts));
+      const res = await workoutAPI.getWorkouts();
+      console.log("getWorkouts response:", JSON.stringify(res.data, null, 2));
+      if (res.ok) {
+        const data = Array.isArray(res.data) ? res.data : [res.data];
+        console.log("Processed workouts:", data);
+        setWorkouts(data);
       } else {
+        console.error("getWorkouts failed:", res.problem);
         setWorkouts([]);
       }
     } catch (error) {
@@ -150,83 +166,146 @@ function HomePage({ navigation }) {
     }
   };
 
-  const saveWorkouts = async (updatedWorkouts) => {
+  const loadPersonalBests = async () => {
     try {
-      await AsyncStorage.setItem("workouts", JSON.stringify(updatedWorkouts));
-      setWorkouts(updatedWorkouts);
+      const res = await personalBestAPI.getPersonalBests();
+      console.log("Personal bests loaded:", res.data);
+      if (res.ok) {
+        setPersonalBests(Array.isArray(res.data) ? res.data : []);
+      } else {
+        setPersonalBests([]);
+      }
     } catch (error) {
-      console.error("Error saving workouts:", error);
+      console.error("Error loading personal bests:", error);
+      setPersonalBests([]);
     }
   };
 
-  const handleAddWorkout = () => {
+  const loadProgressPhotos = async () => {
+    try {
+      const res = await progressPhotoAPI.getProgressPhotos();
+      console.log("Progress photos loaded:", res.data);
+      if (res.ok) {
+        setProgressPhotos(Array.isArray(res.data) ? res.data : []);
+      } else {
+        setProgressPhotos([]);
+      }
+    } catch (error) {
+      console.error("Error loading progress photos:", error);
+      setProgressPhotos([]);
+    }
+  };
+
+  const saveWorkouts = async () => {
+    await loadWorkouts();
+  };
+
+  const loadWorkoutDetails = async (workoutId) => {
+    try {
+      const res = await workoutAPI.getWorkoutById(workoutId);
+      if (res.ok) {
+        console.log(
+          "Workout details loaded:",
+          JSON.stringify(res.data, null, 2)
+        );
+
+        const pbRes = await personalBestAPI.getPersonalBests();
+        console.log("Personal bests loaded:", pbRes.data);
+
+        const photoRes = await progressPhotoAPI.getProgressPhotos();
+        console.log("Progress photos loaded:", photoRes.data);
+
+        const workoutWithExtras = {
+          ...res.data,
+          personal_bests: pbRes.ok
+            ? pbRes.data.filter((pb) => pb.workout_id === workoutId)
+            : [],
+          progress_photos: photoRes.ok
+            ? photoRes.data.filter((photo) => photo.workout_id === workoutId)
+            : [],
+        };
+
+        console.log("Combined workout data:", workoutWithExtras);
+        return workoutWithExtras;
+      }
+    } catch (error) {
+      console.error("Error loading workout details:", error);
+    }
+    return null;
+  };
+
+  const handleAddWorkout = async () => {
     if (!workoutName.trim() || !exerciseName.trim() || !sets || !reps) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
-
+    console.log("Adding workout:", {
+      workoutName,
+      exerciseName,
+      sets,
+      reps,
+      weight,
+    });
     const newWorkout = {
-      id: Date.now().toString(),
       name: workoutName,
       date: new Date().toISOString(),
       exercises: [
         {
-          id: Date.now().toString(),
           name: exerciseName,
           sets: parseInt(sets),
           reps: parseInt(reps),
           weight: weight ? parseFloat(weight) : 0,
-          completed: false,
         },
       ],
-      photos: [],
-      personalBests: [],
     };
 
-    const updatedWorkouts = [newWorkout, ...workouts];
-    saveWorkouts(updatedWorkouts);
-
-    setWorkoutName("");
-    setExerciseName("");
-    setSets("");
-    setReps("");
-    setWeight("");
-    setShowAddWorkout(false);
+    try {
+      const res = await workoutAPI.createWorkout(newWorkout);
+      if (res.ok) {
+        await loadWorkouts();
+        setWorkoutName("");
+        setExerciseName("");
+        setSets("");
+        setReps("");
+        setWeight("");
+        setShowAddWorkout(false);
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to create workout");
+    }
   };
 
-  const handleAddExercise = (workoutId) => {
+  const handleAddExercise = async (workoutId) => {
     if (!exerciseName.trim() || !sets || !reps) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     const newExercise = {
-      id: Date.now().toString(),
       name: exerciseName,
       sets: parseInt(sets),
       reps: parseInt(reps),
       weight: weight ? parseFloat(weight) : 0,
-      completed: false,
     };
 
-    const updatedWorkouts = workouts.map((workout) => {
-      if (workout.id === workoutId) {
-        return {
-          ...workout,
-          exercises: [...workout.exercises, newExercise],
-        };
+    try {
+      const res = await exerciseAPI.addExercise(workoutId, newExercise);
+      if (res.ok) {
+        // Reload full workout details
+        const updatedWorkout = await loadWorkoutDetails(workoutId);
+        if (updatedWorkout) {
+          setSelectedWorkout(updatedWorkout);
+        }
+        setExerciseName("");
+        setSets("");
+        setReps("");
+        setWeight("");
       }
-      return workout;
-    });
-
-    saveWorkouts(updatedWorkouts);
-    setExerciseName("");
-    setSets("");
-    setReps("");
-    setWeight("");
-
-    const updated = updatedWorkouts.find((w) => w.id === workoutId);
-    setSelectedWorkout(updated);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to add exercise");
+    }
   };
 
   const handleOpenEditExercise = (workout, exercise) => {
@@ -238,47 +317,38 @@ function HomePage({ navigation }) {
     setShowEditExercise(true);
   };
 
-  const handleSaveEditExercise = () => {
+  const handleSaveEditExercise = async () => {
     if (!exerciseName.trim() || !sets || !reps) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
-    const updatedWorkouts = workouts.map((workout) => {
-      if (workout.id === selectedWorkout.id) {
-        return {
-          ...workout,
-          exercises: workout.exercises.map((ex) =>
-            ex.id === selectedExercise.id
-              ? {
-                  ...ex,
-                  name: exerciseName,
-                  sets: parseInt(sets),
-                  reps: parseInt(reps),
-                  weight: weight ? parseFloat(weight) : 0,
-                }
-              : ex
-          ),
-        };
-      }
-      return workout;
-    });
+    try {
+      await exerciseAPI.updateExercise(selectedExercise.id, {
+        name: exerciseName,
+        sets: parseInt(sets),
+        reps: parseInt(reps),
+        weight: weight ? parseFloat(weight) : 0,
+      });
 
-    saveWorkouts(updatedWorkouts);
+      await loadWorkouts();
+      const updated = workouts.find((w) => w.id === selectedWorkout.id);
+      setSelectedWorkout(updated);
 
-    const updated = updatedWorkouts.find((w) => w.id === selectedWorkout.id);
-    setSelectedWorkout(updated);
+      setShowEditExercise(false);
+      setExerciseName("");
+      setSets("");
+      setReps("");
+      setWeight("");
 
-    setShowEditExercise(false);
-    setExerciseName("");
-    setSets("");
-    setReps("");
-    setWeight("");
-
-    Alert.alert("Success", "Exercise updated successfully!");
+      Alert.alert("Success", "Exercise updated successfully!");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to update exercise");
+    }
   };
 
-  const handleDeleteExercise = (workoutId, exerciseId) => {
+  const handleDeleteExercise = async (workoutId, exerciseId) => {
     Alert.alert(
       "Delete Exercise",
       "Are you sure you want to delete this exercise?",
@@ -287,119 +357,87 @@ function HomePage({ navigation }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            const updatedWorkouts = workouts.map((workout) => {
-              if (workout.id === workoutId) {
-                return {
-                  ...workout,
-                  exercises: workout.exercises.filter(
-                    (ex) => ex.id !== exerciseId
-                  ),
-                };
-              }
-              return workout;
-            });
-
-            saveWorkouts(updatedWorkouts);
-
-            const updated = updatedWorkouts.find((w) => w.id === workoutId);
-            setSelectedWorkout(updated);
-
-            Alert.alert("Success", "Exercise deleted");
+          onPress: async () => {
+            try {
+              await exerciseAPI.deleteExercise(exerciseId);
+              await loadWorkouts();
+              const updated = workouts.find((w) => w.id === workoutId);
+              setSelectedWorkout(updated);
+              Alert.alert("Success", "Exercise deleted");
+            } catch (error) {
+              console.error(error);
+            }
           },
         },
       ]
     );
   };
 
-  const toggleExerciseComplete = (workoutId, exerciseId) => {
-    const updatedWorkouts = workouts.map((workout) => {
-      if (workout.id === workoutId) {
-        return {
-          ...workout,
-          exercises: workout.exercises.map((ex) =>
-            ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
-          ),
-        };
-      }
-      return workout;
-    });
-    saveWorkouts(updatedWorkouts);
-
-    const updated = updatedWorkouts.find((w) => w.id === workoutId);
-    setSelectedWorkout(updated);
-  };
-
-  const markPersonalBest = (workoutId, exerciseId) => {
-    const updatedWorkouts = workouts.map((workout) => {
-      if (workout.id === workoutId) {
-        const exercise = workout.exercises.find((ex) => ex.id === exerciseId);
-        const pb = {
-          id: Date.now().toString(),
-          exerciseName: exercise.name,
-          weight: exercise.weight,
-          reps: exercise.reps,
-          date: new Date().toISOString(),
-        };
-        return {
-          ...workout,
-          personalBests: [...(workout.personalBests || []), pb],
-        };
-      }
-      return workout;
-    });
-    saveWorkouts(updatedWorkouts);
-
-    const updated = updatedWorkouts.find((w) => w.id === workoutId);
-    setSelectedWorkout(updated);
-
-    Alert.alert("Personal Best!", "New PR logged successfully!");
-  };
-
-  const handleAddPhoto = async (workoutId) => {
+  const toggleExerciseComplete = async (workoutId, exerciseId) => {
+    const workout = workouts.find((w) => w.id === workoutId);
+    const exercise = workout.exercises.find((ex) => ex.id === exerciseId);
     try {
-      const { granted } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!granted) {
-        Alert.alert("Error", "Media library permission denied");
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled) {
-        const updatedWorkouts = workouts.map((workout) => {
-          if (workout.id === workoutId) {
-            return {
-              ...workout,
-              photos: [
-                ...(workout.photos || []),
-                {
-                  id: Date.now().toString(),
-                  uri: result.assets[0].uri,
-                  date: new Date().toISOString(),
-                },
-              ],
-            };
-          }
-          return workout;
-        });
-
-        await saveWorkouts(updatedWorkouts);
-        const updatedSelectedWorkout = updatedWorkouts.find(
-          (w) => w.id === workoutId
-        );
-        setSelectedWorkout(updatedSelectedWorkout);
-      }
+      await exerciseAPI.completeExercise(exerciseId, !exercise.completed);
+      await loadWorkouts();
+      const updated = workouts.find((w) => w.id === workoutId);
+      setSelectedWorkout(updated);
     } catch (error) {
-      Alert.alert("Error", "Failed to add photo");
+      console.error(error);
     }
   };
+
+  const markPersonalBest = async (workoutId, exerciseId) => {
+    try {
+      const workout = workouts.find((w) => w.id === workoutId);
+      const exercise = workout.exercises.find((ex) => ex.id === exerciseId);
+      const pb = {
+        exerciseName: exercise.name,
+        weight: exercise.weight,
+        reps: exercise.reps,
+        workoutId,
+      };
+      await personalBestAPI.addPersonalBest(pb);
+
+      // Reload full workout details to show new personal best
+      const updatedWorkout = await loadWorkoutDetails(workoutId);
+      if (updatedWorkout) {
+        setSelectedWorkout(updatedWorkout);
+      }
+
+      Alert.alert("Personal Best!", "New PR logged successfully!");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to log personal best");
+    }
+  };
+  // const handleAddPhoto = async (workoutId) => {
+  //   try {
+  //     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //     if (!granted) {
+  //       Alert.alert("Error", "Media library permission denied");
+  //       return;
+  //     }
+
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsEditing: true,
+  //       aspect: [4, 3],
+  //       quality: 0.8,
+  //     });
+
+  //     if (!result.canceled) {
+  //       const photoData = { workoutId, uri: result.assets[0].uri };
+  //       await progressPhotoAPI.addProgressPhoto(photoData);
+
+  //       await loadWorkouts();
+  //       const updated = workouts.find((w) => w.id === workoutId);
+  //       setSelectedWorkout(updated);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     Alert.alert("Error", "Failed to add photo");
+  //   }
+  // };
 
   const deleteWorkout = (workoutId) => {
     Alert.alert(
@@ -410,10 +448,14 @@ function HomePage({ navigation }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            const updatedWorkouts = workouts.filter((w) => w.id !== workoutId);
-            saveWorkouts(updatedWorkouts);
-            setShowWorkoutDetail(false);
+          onPress: async () => {
+            try {
+              await workoutAPI.deleteWorkout(workoutId);
+              await loadWorkouts();
+              setShowWorkoutDetail(false);
+            } catch (error) {
+              console.error(error);
+            }
           },
         },
       ]
@@ -453,16 +495,13 @@ function HomePage({ navigation }) {
         />
         <StatCard
           icon="trophy"
-          number={workouts.reduce(
-            (sum, w) => sum + (w.personalBests?.length || 0),
-            0
-          )}
+          number={personalBests.length}
           label="PRs"
           color="#FFD700"
         />
         <StatCard
           icon="camera"
-          number={workouts.reduce((sum, w) => sum + (w.photos?.length || 0), 0)}
+          number={progressPhotos.length}
           label="Photos"
           color="#4CAF50"
         />
@@ -528,10 +567,13 @@ function HomePage({ navigation }) {
               key={workout.id}
               workout={workout}
               formatDate={formatDate}
-              onPress={() => {
+              onPress={async () => {
                 loadDefaultValues();
-                setSelectedWorkout(workout);
-                setShowWorkoutDetail(true);
+                const fullWorkout = await loadWorkoutDetails(workout.id);
+                if (fullWorkout) {
+                  setSelectedWorkout(fullWorkout);
+                  setShowWorkoutDetail(true);
+                }
               }}
             />
           ))
@@ -660,68 +702,73 @@ function HomePage({ navigation }) {
 
             <ScrollView style={styles.modalBody}>
               <Text style={styles.sectionHeader}>Exercises</Text>
-              {selectedWorkout?.exercises.map((exercise) => (
-                <View key={exercise.id} style={styles.exerciseCard}>
-                  <TouchableOpacity
-                    style={styles.exerciseCheckbox}
-                    onPress={() =>
-                      toggleExerciseComplete(selectedWorkout.id, exercise.id)
-                    }
-                  >
-                    <MaterialCommunityIcons
-                      name={
-                        exercise.completed
-                          ? "checkbox-marked"
-                          : "checkbox-blank-outline"
+              {selectedWorkout?.exercises &&
+              selectedWorkout.exercises.length > 0 ? (
+                selectedWorkout.exercises.map((exercise) => (
+                  <View key={exercise.id} style={styles.exerciseCard}>
+                    <TouchableOpacity
+                      style={styles.exerciseCheckbox}
+                      onPress={() =>
+                        toggleExerciseComplete(selectedWorkout.id, exercise.id)
                       }
-                      size={24}
-                      color={exercise.completed ? Colors.primary : "#666"}
-                    />
-                  </TouchableOpacity>
-
-                  <View style={styles.exerciseInfo}>
-                    <Text
-                      style={[
-                        styles.exerciseName,
-                        exercise.completed && styles.exerciseCompleted,
-                      ]}
                     >
-                      {exercise.name}
-                    </Text>
-                    <Text style={styles.exerciseDetails}>
-                      {exercise.sets} sets × {exercise.reps} reps
-                      {exercise.weight > 0 &&
-                        ` • ${displayWeight(exercise.weight)}`}
-                    </Text>
+                      <MaterialCommunityIcons
+                        name={
+                          exercise.completed
+                            ? "checkbox-marked"
+                            : "checkbox-blank-outline"
+                        }
+                        size={24}
+                        color={exercise.completed ? Colors.primary : "#666"}
+                      />
+                    </TouchableOpacity>
+
+                    <View style={styles.exerciseInfo}>
+                      <Text
+                        style={[
+                          styles.exerciseName,
+                          exercise.completed && styles.exerciseCompleted,
+                        ]}
+                      >
+                        {exercise.name}
+                      </Text>
+                      <Text style={styles.exerciseDetails}>
+                        {exercise.sets} sets × {exercise.reps} reps
+                        {exercise.weight > 0 &&
+                          ` • ${displayWeight(exercise.weight)}`}
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.prButton}
+                      onPress={() =>
+                        handleOpenEditExercise(selectedWorkout, exercise)
+                      }
+                    >
+                      <MaterialIcons
+                        name="edit"
+                        size={20}
+                        color={Colors.primary}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.prButton}
+                      onPress={() =>
+                        markPersonalBest(selectedWorkout.id, exercise.id)
+                      }
+                    >
+                      <MaterialCommunityIcons
+                        name="trophy"
+                        size={20}
+                        color="#FFD700"
+                      />
+                    </TouchableOpacity>
                   </View>
-
-                  <TouchableOpacity
-                    style={styles.prButton}
-                    onPress={() =>
-                      handleOpenEditExercise(selectedWorkout, exercise)
-                    }
-                  >
-                    <MaterialIcons
-                      name="edit"
-                      size={20}
-                      color={Colors.primary}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.prButton}
-                    onPress={() =>
-                      markPersonalBest(selectedWorkout.id, exercise.id)
-                    }
-                  >
-                    <MaterialCommunityIcons
-                      name="trophy"
-                      size={20}
-                      color="#FFD700"
-                    />
-                  </TouchableOpacity>
-                </View>
-              ))}
+                ))
+              ) : (
+                <Text style={styles.emptyText}>No exercises yet</Text>
+              )}
 
               <View style={styles.addExerciseForm}>
                 <Text style={styles.addExerciseTitle}>Add Exercise</Text>
@@ -767,12 +814,13 @@ function HomePage({ navigation }) {
                 </TouchableOpacity>
               </View>
 
-              {selectedWorkout?.personalBests?.length > 0 && (
+              {selectedWorkout?.personal_bests &&
+              selectedWorkout.personal_bests.length > 0 ? (
                 <>
                   <Text style={styles.sectionHeader}>Personal Bests 🏆</Text>
-                  {selectedWorkout.personalBests.map((pb) => (
+                  {selectedWorkout.personal_bests.map((pb) => (
                     <View key={pb.id} style={styles.pbCard}>
-                      <Text style={styles.pbExercise}>{pb.exerciseName}</Text>
+                      <Text style={styles.pbExercise}>{pb.exercise_name}</Text>
                       <Text style={styles.pbDetails}>
                         {displayWeight(pb.weight)} × {pb.reps} reps
                       </Text>
@@ -780,24 +828,28 @@ function HomePage({ navigation }) {
                     </View>
                   ))}
                 </>
-              )}
+              ) : null}
 
-              {selectedWorkout?.photos?.length > 0 && (
-                <>
-                  <Text style={styles.sectionHeader}>Progress Photos</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.photosContainer}>
-                      {selectedWorkout.photos.map((photo) => (
-                        <Image
-                          key={photo.id}
-                          source={{ uri: photo.uri }}
-                          style={styles.progressPhoto}
-                        />
-                      ))}
-                    </View>
-                  </ScrollView>
-                </>
-              )}
+              {selectedWorkout?.progress_photos &&
+                selectedWorkout.progress_photos.length > 0 && (
+                  <>
+                    <Text style={styles.sectionHeader}>Progress Photos</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                    >
+                      <View style={styles.photosContainer}>
+                        {selectedWorkout.progress_photos.map((photo) => (
+                          <Image
+                            key={photo.id}
+                            source={{ uri: photo.uri }}
+                            style={styles.progressPhoto}
+                          />
+                        ))}
+                      </View>
+                    </ScrollView>
+                  </>
+                )}
             </ScrollView>
           </View>
         </View>
