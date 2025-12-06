@@ -34,7 +34,6 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   await workoutController.deleteWorkout(req, res);
 });
 
-// ============ EXERCISE ROUTES ============
 router.post(
   "/:workoutId/exercises",
   authMiddleware,
