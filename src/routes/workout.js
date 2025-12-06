@@ -1,32 +1,15 @@
 import express from "express";
 import WorkoutController from "../controllers/WorkoutController.js";
+import validation from "../middleware/validation.js";
+import schemas from "../utils/schemas.js";
 import Joi from "joi";
 
 const router = express.Router();
 const workoutController = new WorkoutController();
 
-const createWorkoutSchema = Joi.object({
-  name: Joi.string().required(),
-  date: Joi.date().optional(),
-  exercises: Joi.array()
-    .items(
-      Joi.object({
-        name: Joi.string().required(),
-        sets: Joi.number().required(),
-        reps: Joi.number().required(),
-        weight: Joi.number().optional(),
-      })
-    )
-    .required(),
-});
+const createWorkoutSchema = schemas.createWorkoutSchema;
 
-router.post("/", async (req, res) => {
-  const { error } = createWorkoutSchema.validate(req.body);
-  if (error) {
-    return res
-      .status(400)
-      .json({ success: false, error: error.details[0].message });
-  }
+router.post("/", validation(createWorkoutSchema), async (req, res) => {
   await workoutController.createWorkout(req, res);
 });
 router.get("/", async (req, res) => {
