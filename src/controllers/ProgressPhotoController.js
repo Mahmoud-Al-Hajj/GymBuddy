@@ -1,4 +1,4 @@
-import ProgressPhotoService from "../services/ProgressPhotoService";
+import ProgressPhotoService from "../services/ProgressPhotoService.js";
 
 class ProgressPhotoController {
   constructor() {

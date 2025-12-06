@@ -9,7 +9,10 @@ const router = express.Router();
 const workoutController = new WorkoutController();
 
 const createWorkoutSchema = schemas.createWorkoutSchema;
+const addExerciseSchema = schemas.addExerciseSchema;
+const completeExerciseSchema = schemas.completeExerciseSchema;
 
+// ============ WORKOUT ROUTES ============
 router.post(
   "/",
   authMiddleware,
@@ -30,5 +33,32 @@ router.put("/:id", authMiddleware, async (req, res) => {
 router.delete("/:id", authMiddleware, async (req, res) => {
   await workoutController.deleteWorkout(req, res);
 });
+
+// ============ EXERCISE ROUTES ============
+router.post(
+  "/:workoutId/exercises",
+  authMiddleware,
+  validation(addExerciseSchema),
+  async (req, res) => {
+    await workoutController.addExercise(req, res);
+  }
+);
+
+router.put("/exercises/:exerciseId", authMiddleware, async (req, res) => {
+  await workoutController.updateExercise(req, res);
+});
+
+router.delete("/exercises/:exerciseId", authMiddleware, async (req, res) => {
+  await workoutController.deleteExercise(req, res);
+});
+
+router.post(
+  "/exercises/:exerciseId/complete",
+  authMiddleware,
+  validation(completeExerciseSchema),
+  async (req, res) => {
+    await workoutController.completeExercise(req, res);
+  }
+);
 
 export default router;

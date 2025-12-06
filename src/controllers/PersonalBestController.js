@@ -1,4 +1,4 @@
-import PersonalBestService from "../services/PersonalBestService";
+import PersonalBestService from "../services/PersonalBestService.js";
 
 class PersonalBestController {
   constructor() {

@@ -1,5 +1,5 @@
 import express from "express";
-import ProgressPhotoController from "../controllers/ProgressPhotoController";
+import ProgressPhotoController from "../controllers/ProgressPhotoController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();

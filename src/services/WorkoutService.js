@@ -12,7 +12,7 @@ class WorkoutService {
         data: {
           user_id: userId,
           name,
-          date: date || new Date(),
+          date: date ? new Date(date) : new Date(),
         },
       });
 
