@@ -64,9 +64,20 @@ export const personalBestAPI = {
 };
 
 // ============ PROGRESS PHOTO APIs ============
+
 export const progressPhotoAPI = {
-  addProgressPhoto: (photoData) => api.post("/progress-photos", photoData),
+  addProgressPhoto: (formData) =>
+    api.post("/progress-photos", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+
+      // This is CRUCIAL. Without this, axios tries to JSON-encode FormData.
+      transformRequest: (data) => data,
+    }),
+
   getProgressPhotos: () => api.get("/progress-photos"),
+
   deleteProgressPhoto: (photoId) => api.delete(`/progress-photos/${photoId}`),
 };
 

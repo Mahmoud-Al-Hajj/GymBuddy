@@ -166,6 +166,59 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
+  formContainer: {
+    marginTop: 20,
+    paddingBottom: 20,
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  sectionContainer: {
+    marginBottom: 24,
+  },
+  pbItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    gap: 12,
+  },
+  pbInfo: {
+    flex: 1,
+  },
+  pbName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  pbDetails: {
+    fontSize: 12,
+    color: "#aaa",
+    marginTop: 4,
+  },
+  photoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    gap: 12,
+  },
+  photoDate: {
+    fontSize: 12,
+    color: "#aaa",
+  },
+  deletedExerciseText: {
+    fontStyle: "italic",
+    color: "#999",
+  },
   deleteButton: {
     backgroundColor: "#ff4444",
     borderRadius: 12,
@@ -194,6 +247,15 @@ export const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  exerciseItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
   exerciseCheckbox: {
     marginRight: 12,
   },
@@ -205,6 +267,10 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
+  completedExercise: {
+    textDecorationLine: "line-through",
+    color: "#888",
+  },
   exerciseCompleted: {
     textDecorationLine: "line-through",
     color: "#888",
@@ -213,6 +279,10 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#888",
     marginTop: 4,
+  },
+  exerciseButton: {
+    padding: 8,
+    marginLeft: 4,
   },
   prButton: {
     padding: 8,

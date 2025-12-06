@@ -253,7 +253,7 @@ function HomePage({ navigation }) {
 
   const handleAddPhoto = async (workoutId) => {
     try {
-      await addProgressPhoto();
+      await addProgressPhoto(workoutId);
       await refreshWorkoutDetail(workoutId);
       Alert.alert("Success", "Photo added successfully!");
     } catch (error) {
@@ -407,6 +407,8 @@ function HomePage({ navigation }) {
           setShowEditExercise(true);
         }}
         onMarkPersonalBest={handleMarkPersonalBest}
+        onMarkPR={handleMarkPersonalBest}
+        onDeleteExercise={handleDeleteExercise}
         onAddExercise={handleAddExercise}
         onAddPhoto={handleAddPhoto}
         exerciseName={exerciseName}

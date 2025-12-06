@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../../styles/HomePage.styles";
+import { styles } from "../styles/HomePage.styles";
 
 export const AddWorkoutModal = ({
   visible,
