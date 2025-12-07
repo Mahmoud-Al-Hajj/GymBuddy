@@ -12,15 +12,17 @@ import {
 } from "react-native";
 import { Colors } from "../constants/colors.js";
 import { styles } from "../styles/SettingsPage.styles.js";
+import { settingsAPI } from "../utils/api.js";
 
 function SettingsPage({ navigation }) {
   const [weightUnit, setWeightUnit] = useState("kg");
   const [defaultSets, setDefaultSets] = useState(3);
   const [defaultReps, setDefaultReps] = useState(10);
   const [restTimer, setRestTimer] = useState("");
-
-  const [showRestTimerModal, setShowRestTimerModal] = useState(false);
   const [tempValue, setTempValue] = useState("");
+  const [showRestTimerModal, setShowRestTimerModal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [originalSettings, setOriginalSettings] = useState({});
 
   useEffect(() => {
     loadSettings();
@@ -28,38 +30,74 @@ function SettingsPage({ navigation }) {
 
   const loadSettings = async () => {
     try {
-      const settings = {
+      const response = await settingsAPI.getSettings();
+      console.log("getSettings response:", response);
+
+      if (response.ok && response.data) {
+        const settings = response.data;
+        setWeightUnit(settings.weightUnit || "kg");
+        setDefaultSets(settings.defaultSets || 3);
+        setDefaultReps(settings.defaultReps || 12);
+        setRestTimer(settings.restTimer?.toString() || "90");
+
+        setOriginalSettings({
+          weightUnit: settings.weightUnit || "kg",
+          defaultSets: settings.defaultSets || 3,
+          defaultReps: settings.defaultReps || 12,
+          restTimer: settings.restTimer?.toString() || "90",
+        });
+
+        // Also save to AsyncStorage for offline access
+        await AsyncStorage.setItem("weightUnit", settings.weightUnit || "kg");
+        await AsyncStorage.setItem(
+          "defaultSets",
+          (settings.defaultSets || 3).toString()
+        );
+        await AsyncStorage.setItem(
+          "defaultReps",
+          (settings.defaultReps || 12).toString()
+        );
+        await AsyncStorage.setItem(
+          "restTimer",
+          (settings.restTimer || 90).toString()
+        );
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+      // Fall back to AsyncStorage if API fails
+      const localSettings = {
         weightUnit: await AsyncStorage.getItem("weightUnit"),
         defaultSets: await AsyncStorage.getItem("defaultSets"),
         defaultReps: await AsyncStorage.getItem("defaultReps"),
         restTimer: await AsyncStorage.getItem("restTimer"),
       };
 
-      if (settings.weightUnit !== null) {
-        setWeightUnit(settings.weightUnit);
-      }
-      if (settings.defaultSets !== null) {
-        setDefaultSets(parseInt(settings.defaultSets));
-      }
-      if (settings.defaultReps !== null) {
-        setDefaultReps(parseInt(settings.defaultReps));
-      }
-      if (settings.restTimer !== null) {
-        setRestTimer(settings.restTimer);
-      }
-    } catch (error) {
-      console.error("Error loading settings:", error);
+      if (localSettings.weightUnit) setWeightUnit(localSettings.weightUnit);
+      if (localSettings.defaultSets)
+        setDefaultSets(parseInt(localSettings.defaultSets));
+      if (localSettings.defaultReps)
+        setDefaultReps(parseInt(localSettings.defaultReps));
+      if (localSettings.restTimer) setRestTimer(localSettings.restTimer);
     }
   };
 
   const saveSetting = async (key, value) => {
     try {
-      await AsyncStorage.setItem(
-        key,
-        typeof value === "boolean" ? JSON.stringify(value) : value.toString()
-      );
+      // Save to AsyncStorage first
+      let valueToStore = value.toString();
+      if (typeof value === "boolean") {
+        valueToStore = JSON.stringify(value);
+      }
+      await AsyncStorage.setItem(key, valueToStore);
+
+      const snakeCaseKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
+      const settingData = {};
+      settingData[snakeCaseKey] = value;
+
+      const updateResponse = await settingsAPI.updateSettings(settingData);
+      console.log("updateSettings response:", updateResponse);
     } catch (error) {
-      console.error(`Error saving ${key}:`, error);
+      console.error("Error saving " + key + ":", error);
       Alert.alert("Error", "Failed to save setting");
     }
   };
@@ -67,11 +105,11 @@ function SettingsPage({ navigation }) {
   const toggleWeightUnit = async () => {
     const newUnit = weightUnit === "kg" ? "lbs" : "kg";
     setWeightUnit(newUnit);
-    await saveSetting("weightUnit", newUnit);
+    setHasUnsavedChanges(true);
 
     Alert.alert(
       "Weight Unit Changed",
-      `All weights will be displayed in ${newUnit.toUpperCase()}`
+      `All weights will be displayed in ${newUnit}`
     );
   };
 
@@ -79,7 +117,7 @@ function SettingsPage({ navigation }) {
     if (defaultSets < 20) {
       const newValue = defaultSets + 1;
       setDefaultSets(newValue);
-      await saveSetting("defaultSets", newValue.toString());
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -87,7 +125,7 @@ function SettingsPage({ navigation }) {
     if (defaultSets > 1) {
       const newValue = defaultSets - 1;
       setDefaultSets(newValue);
-      await saveSetting("defaultSets", newValue.toString());
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -95,7 +133,7 @@ function SettingsPage({ navigation }) {
     if (defaultReps < 100) {
       const newValue = defaultReps + 1;
       setDefaultReps(newValue);
-      await saveSetting("defaultReps", newValue.toString());
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -103,7 +141,7 @@ function SettingsPage({ navigation }) {
     if (defaultReps > 1) {
       const newValue = defaultReps - 1;
       setDefaultReps(newValue);
-      await saveSetting("defaultReps", newValue.toString());
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -114,11 +152,70 @@ function SettingsPage({ navigation }) {
     }
 
     setRestTimer(tempValue);
-    await saveSetting("restTimer", tempValue);
+    setHasUnsavedChanges(true);
     setShowRestTimerModal(false);
     Alert.alert("Success", `Rest timer set to ${tempValue} seconds`);
   };
 
+  const handleSaveSettings = async () => {
+    const settingsData = {
+      weight_unit: weightUnit,
+      default_sets: defaultSets,
+      default_reps: defaultReps,
+      rest_timer: parseInt(restTimer),
+    };
+    try {
+      const response = await settingsAPI.updateSettings(settingsData);
+      console.log("handleSaveSettings response:", response);
+
+      if (response.ok) {
+        // Save to AsyncStorage
+        await AsyncStorage.setItem("weightUnit", weightUnit);
+        await AsyncStorage.setItem("defaultSets", defaultSets.toString());
+        await AsyncStorage.setItem("defaultReps", defaultReps.toString());
+        await AsyncStorage.setItem("restTimer", restTimer);
+
+        // Update original settings to match current settings
+        const newOriginalSettings = {
+          weightUnit,
+          defaultSets,
+          defaultReps,
+          restTimer,
+        };
+        setOriginalSettings(newOriginalSettings);
+
+        setHasUnsavedChanges(false);
+        Alert.alert("Success", "Settings saved successfully!");
+      } else {
+        Alert.alert("Error", "Failed to save settings");
+      }
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      Alert.alert("Error", "Failed to save settings");
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    Alert.alert(
+      "Discard Changes",
+      "Are you sure you want to discard your changes?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: () => {
+            console.log("Discarding changes, restoring to:", originalSettings);
+            setWeightUnit(originalSettings.weightUnit || "kg");
+            setDefaultSets(originalSettings.defaultSets || 3);
+            setDefaultReps(originalSettings.defaultReps || 12);
+            setRestTimer(originalSettings.restTimer || "90");
+            setHasUnsavedChanges(false);
+          },
+        },
+      ]
+    );
+  };
   const handleEditProfile = () => {
     navigation.navigate("Profile");
   };
@@ -131,20 +228,27 @@ function SettingsPage({ navigation }) {
         style: "destructive",
         onPress: async () => {
           try {
-            await AsyncStorage.multiRemove([
-              "weightUnit",
-              "defaultSets",
-              "defaultReps",
-              "restTimer",
-            ]);
+            // Reset on backend
+            const response = await settingsAPI.resetSettings();
+            console.log("resetSettings response:", response);
 
-            // Reset to defaults
-            setWeightUnit("kg");
-            setDefaultSets(3);
-            setDefaultReps(12);
-            setRestTimer("");
+            if (response.ok) {
+              // Clear AsyncStorage
+              await AsyncStorage.multiRemove([
+                "weightUnit",
+                "defaultSets",
+                "defaultReps",
+                "restTimer",
+              ]);
 
-            Alert.alert("Success", "Settings reset to defaults");
+              // Reset state to defaults
+              setWeightUnit("kg");
+              setDefaultSets(3);
+              setDefaultReps(12);
+              setRestTimer("90");
+
+              Alert.alert("Success", "Settings reset to defaults");
+            }
           } catch (error) {
             console.error("Error resetting settings:", error);
             Alert.alert("Error", "Failed to reset settings");
@@ -202,7 +306,24 @@ function SettingsPage({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            if (hasUnsavedChanges) {
+              Alert.alert(
+                "Unsaved Changes",
+                "You have unsaved changes. Do you want to discard them?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Discard",
+                    style: "destructive",
+                    onPress: () => navigation.goBack(),
+                  },
+                ]
+              );
+            } else {
+              navigation.goBack();
+            }
+          }}
           style={styles.backButton}
         >
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
@@ -212,10 +333,10 @@ function SettingsPage({ navigation }) {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Account */}
+        {/* All your existing sections stay the same */}
+        {/* Account section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-
           <TouchableOpacity
             style={styles.settingRow}
             onPress={handleEditProfile}
@@ -228,7 +349,7 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Workout Preferences */}
+        {/* Workout Preferences section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Workout Preferences</Text>
 
@@ -248,9 +369,7 @@ function SettingsPage({ navigation }) {
               </View>
             </View>
             <View style={styles.unitBadge}>
-              <Text style={styles.unitBadgeText}>
-                {weightUnit.toUpperCase()}
-              </Text>
+              <Text style={styles.unitBadgeText}>{weightUnit}</Text>
             </View>
           </TouchableOpacity>
 
@@ -339,7 +458,7 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* About */}
+        {/* About section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
 
@@ -386,8 +505,27 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* NEW: Save/Discard buttons at bottom */}
+      {hasUnsavedChanges && (
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity
+            style={styles.discardButton}
+            onPress={handleDiscardChanges}
+          >
+            <Text style={styles.discardButtonText}>Discard</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSaveSettings}
+          >
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Modals */}
       <SettingModal
