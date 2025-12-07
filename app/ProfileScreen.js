@@ -331,7 +331,7 @@ function ProfilePage({ navigation }) {
               });
 
               // Navigate back to home to trigger reload
-              navigation.goBack();
+              navigation.navigate("Home");
 
               // Show alert after short delay
               setTimeout(() => {
@@ -414,7 +414,7 @@ function ProfilePage({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("Home")}
           style={styles.backButton}
         >
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
