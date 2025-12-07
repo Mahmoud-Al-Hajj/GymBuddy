@@ -23,14 +23,14 @@ export const authAPI = {
     api.post("/auth/register", { username, email, password }),
 };
 
-// ============ USER/PROFILE APIs ============
+//  USER/PROFILE APIs
 export const profileAPI = {
   getProfile: () => api.get("/users/profile"),
   updateProfile: (userData) => api.post("/users/profile", userData),
   deleteProfile: () => api.delete("/users/profile"),
 };
 
-// ============ WORKOUT APIs ============
+//  WORKOUT APIs
 export const workoutAPI = {
   createWorkout: (workoutData) => api.post("/workouts", workoutData),
   getWorkouts: () => api.get("/workouts"),
@@ -40,7 +40,7 @@ export const workoutAPI = {
   deleteWorkout: (workoutId) => api.delete(`/workouts/${workoutId}`),
 };
 
-// ============ EXERCISE APIs ============
+//  EXERCISE APIs
 export const exerciseAPI = {
   addExercise: (workoutId, exerciseData) =>
     api.post(`/workouts/${workoutId}/exercises`, exerciseData),
@@ -52,7 +52,7 @@ export const exerciseAPI = {
     api.post(`/workouts/exercises/${exerciseId}/complete`, { completed }),
 };
 
-// ============ PERSONAL BEST APIs ============
+//  PERSONAL BEST APIs
 export const personalBestAPI = {
   addPersonalBest: (personalBestData) =>
     api.post("/personal-bests", personalBestData),
@@ -63,7 +63,7 @@ export const personalBestAPI = {
     api.delete(`/personal-bests/${personalBestId}`),
 };
 
-// ============ PROGRESS PHOTO APIs ============
+//  PROGRESS PHOTO APIs
 
 export const progressPhotoAPI = {
   addProgressPhoto: (formData) =>
@@ -79,6 +79,12 @@ export const progressPhotoAPI = {
   getProgressPhotos: () => api.get("/progress-photos"),
 
   deleteProgressPhoto: (photoId) => api.delete(`/progress-photos/${photoId}`),
+};
+
+export const settingsAPI = {
+  getSettings: () => api.get("/settings"),
+  updateSettings: (settingsData) => api.put("/settings", settingsData),
+  resetSettings: () => api.post("/settings/reset"),
 };
 
 export default api;

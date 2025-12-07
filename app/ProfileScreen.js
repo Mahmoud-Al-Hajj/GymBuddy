@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Modal,
   TextInput as RNTextInput,
@@ -17,9 +18,18 @@ import InfoRow from "../components/InfoRow.js";
 import ProfileCard from "../components/ProfileCard.js";
 import StatsGrid from "../components/StatsGrid.js";
 import { Colors } from "../constants/colors.js";
+import { usePersonalBests } from "../hooks/usePersonalBests";
+import { useProgressPhotos } from "../hooks/useProgressPhotos";
+import { useWorkouts } from "../hooks/useWorkouts";
 import { styles } from "../styles/ProfileScreen.styles.js";
+import { profileAPI } from "../utils/api.js";
 
 function ProfilePage({ navigation }) {
+  // Use hooks for live data
+  const { workouts, loadWorkouts } = useWorkouts();
+  const { personalBests, loadPersonalBests } = usePersonalBests();
+  const { progressPhotos, loadProgressPhotos } = useProgressPhotos();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("male");
@@ -28,6 +38,8 @@ function ProfilePage({ navigation }) {
   const [height, setHeight] = useState("");
   const [profilePhotoUri, setProfilePhotoUri] = useState("");
   const [weightUnit, setWeightUnit] = useState("kg");
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState("");
@@ -43,9 +55,13 @@ function ProfilePage({ navigation }) {
   useEffect(() => {
     requestPermission();
     loadUserData();
-    loadWorkoutStats();
+    // Load stats from hooks instead
+    loadWorkouts();
+    loadPersonalBests();
+    loadProgressPhotos();
     loadWeightUnit();
   }, []);
+
   const requestPermission = async () => {
     const { granted } = await ImagePicker.requestCameraPermissionsAsync();
     if (!granted) {
@@ -68,6 +84,9 @@ function ProfilePage({ navigation }) {
       const uri = result.assets[0].uri;
       setProfilePhotoUri(uri);
       await SecureStore.setItemAsync("profilePhotoUri", uri);
+
+      // Optionally save to backend
+      await syncProfileToBackend();
     }
   };
 
@@ -83,6 +102,7 @@ function ProfilePage({ navigation }) {
           onPress: async () => {
             setProfilePhotoUri("");
             await SecureStore.deleteItemAsync("profilePhotoUri");
+            await syncProfileToBackend();
           },
         },
       ]
@@ -106,7 +126,69 @@ function ProfilePage({ navigation }) {
     return `${weightInKg} kg`;
   };
 
+  // ============ NEW: Load user data from backend ============
   const loadUserData = async () => {
+    setRefreshing(true);
+    try {
+      // Try to load from backend first
+      const response = await profileAPI.getProfile();
+      console.log("getProfile response:", response);
+
+      if (response.ok && response.data) {
+        const userData = response.data;
+
+        // Update state with backend data
+        if (userData.email) {
+          setEmail(userData.email);
+          setUsername(userData.username || userData.email.split("@")[0]);
+        }
+        if (userData.gender) setGender(userData.gender);
+        if (userData.age) setAge(userData.age.toString());
+        if (userData.weight) setWeight(userData.weight.toString());
+        if (userData.height) setHeight(userData.height.toString());
+
+        // Save to SecureStore for offline access
+        if (userData.email)
+          await SecureStore.setItemAsync("userEmail", userData.email);
+        if (userData.gender)
+          await SecureStore.setItemAsync("userGender", userData.gender);
+        if (userData.age)
+          await SecureStore.setItemAsync("userAge", userData.age.toString());
+        if (userData.weight)
+          await SecureStore.setItemAsync(
+            "userWeight",
+            userData.weight.toString()
+          );
+        if (userData.height)
+          await SecureStore.setItemAsync(
+            "userHeight",
+            userData.height.toString()
+          );
+
+        // Format member since date
+        if (userData.created_at) {
+          const memberSince = formatMemberSince(userData.created_at);
+          setStats((prev) => ({ ...prev, memberSince }));
+        }
+      } else {
+        // If backend fails, load from SecureStore (offline mode)
+        await loadUserDataFromLocal();
+      }
+
+      // Load profile photo from local storage
+      const photoUri = await SecureStore.getItemAsync("profilePhotoUri");
+      if (photoUri) setProfilePhotoUri(photoUri);
+    } catch (error) {
+      console.error("Error loading user data from backend:", error);
+      // Fallback to local storage
+      await loadUserDataFromLocal();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Fallback: Load from local SecureStore
+  const loadUserDataFromLocal = async () => {
     try {
       const userEmail = await SecureStore.getItemAsync("userEmail");
       const userGender = await SecureStore.getItemAsync("userGender");
@@ -114,7 +196,6 @@ function ProfilePage({ navigation }) {
       const userWeight = await SecureStore.getItemAsync("userWeight");
       const userHeight = await SecureStore.getItemAsync("userHeight");
       const memberSince = await SecureStore.getItemAsync("memberSince");
-      const photoUri = await SecureStore.getItemAsync("profilePhotoUri");
 
       if (userEmail) {
         setEmail(userEmail);
@@ -124,7 +205,6 @@ function ProfilePage({ navigation }) {
       if (userAge) setAge(userAge);
       if (userWeight) setWeight(userWeight);
       if (userHeight) setHeight(userHeight);
-      if (photoUri) setProfilePhotoUri(photoUri);
 
       if (!memberSince) {
         const joinDate = new Date().toISOString();
@@ -140,43 +220,19 @@ function ProfilePage({ navigation }) {
         }));
       }
     } catch (error) {
-      console.error("Error loading user data:", error);
+      console.error("Error loading local data:", error);
     }
   };
 
-  const loadWorkoutStats = async () => {
-    try {
-      const storedWorkouts = await AsyncStorage.getItem("workouts");
-
-      if (storedWorkouts) {
-        const workouts = JSON.parse(storedWorkouts);
-
-        const totalWorkouts = workouts.length;
-        let totalPRs = 0;
-        for (let workout of workouts) {
-          if (workout.personalBests) {
-            totalPRs += workout.personalBests.length;
-          }
-        }
-
-        let totalPhotos = 0;
-        for (let workout of workouts) {
-          if (workout.photos) {
-            totalPhotos += workout.photos.length;
-          }
-        }
-
-        setStats((currentStats) => ({
-          ...currentStats,
-          totalWorkouts: totalWorkouts,
-          totalPRs: totalPRs,
-          totalPhotos: totalPhotos,
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading workout stats:", error);
-    }
-  };
+  const loadWorkoutStats = useEffect(() => {
+    // Update stats from hook data
+    setStats((currentStats) => ({
+      ...currentStats,
+      totalWorkouts: workouts.length,
+      totalPRs: personalBests.length,
+      totalPhotos: progressPhotos.length,
+    }));
+  }, [workouts, personalBests, progressPhotos]);
 
   const formatMemberSince = (dateString) => {
     const date = new Date(dateString);
@@ -207,6 +263,28 @@ function ProfilePage({ navigation }) {
     setShowEditModal(true);
   };
 
+  //Save edit with backend sync
+  const syncProfileToBackend = async () => {
+    try {
+      const profileData = {
+        gender: gender,
+        age: age ? parseInt(age) : null,
+        weight: weight ? parseFloat(weight) : null,
+        height: height ? parseFloat(height) : null,
+      };
+
+      const response = await profileAPI.updateProfile(profileData);
+      console.log("updateProfile response:", response);
+
+      if (!response.ok) {
+        console.error("Failed to sync profile to backend");
+      }
+    } catch (error) {
+      console.error("Error syncing profile:", error);
+    }
+  };
+
+  //Save edit with backend sync
   const handleSaveEdit = async () => {
     if (!editValue.trim()) {
       Alert.alert("Error", "Please enter a value");
@@ -247,7 +325,10 @@ function ProfilePage({ navigation }) {
       }
     }
 
+    setLoading(true);
+
     try {
+      // Update local state and SecureStore
       switch (editField) {
         case "gender":
           await SecureStore.setItemAsync("userGender", editValue);
@@ -267,10 +348,25 @@ function ProfilePage({ navigation }) {
           break;
       }
 
+      // Sync to backend
+      const updateData = {
+        [editField]: editField === "gender" ? editValue : parseFloat(editValue),
+      };
+
+      const response = await profileAPI.updateProfile(updateData);
+
+      if (response.ok && response.data) {
+        Alert.alert("Success", "Profile updated successfully!");
+      } else {
+        Alert.alert("Warning", "Saved locally but failed to sync with server");
+      }
+
       setShowEditModal(false);
     } catch (error) {
-      console.error("Error updating profile:", error);
-      Alert.alert("Error", "Failed to update profile");
+      Alert.alert("Warning", "Saved locally but failed to sync with server");
+      setShowEditModal(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -300,49 +396,67 @@ function ProfilePage({ navigation }) {
   const handleClearData = () => {
     Alert.alert(
       "Clear All Data",
-      "This will delete all your workouts, photos, and PRs. This action cannot be undone!",
+      "This will delete all your workouts, photos, and PRs from both your device and our servers. This action cannot be undone!",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete",
+          text: "Delete Everything",
           style: "destructive",
           onPress: async () => {
+            setLoading(true);
             try {
-              // Clear all data
-              await AsyncStorage.removeItem("workouts");
-              await SecureStore.deleteItemAsync("userGender");
-              await SecureStore.deleteItemAsync("userAge");
-              await SecureStore.deleteItemAsync("userWeight");
-              await SecureStore.deleteItemAsync("userHeight");
-              await SecureStore.deleteItemAsync("onboardingCompleted");
-              await SecureStore.deleteItemAsync("profilePhotoUri");
+              // Delete profile from backend
+              const response = await profileAPI.deleteProfile();
 
-              // Reset all state immediately
-              setProfilePhotoUri("");
-              setGender("male");
-              setAge("");
-              setWeight("");
-              setHeight("");
-              setStats({
-                totalWorkouts: 0,
-                totalPRs: 0,
-                totalPhotos: 0,
-                memberSince: stats.memberSince,
-              });
+              if (response.ok) {
+                // Clear local data
+                await AsyncStorage.removeItem("workouts");
+                await SecureStore.deleteItemAsync("userGender");
+                await SecureStore.deleteItemAsync("userAge");
+                await SecureStore.deleteItemAsync("userWeight");
+                await SecureStore.deleteItemAsync("userHeight");
+                await SecureStore.deleteItemAsync("onboardingCompleted");
+                await SecureStore.deleteItemAsync("profilePhotoUri");
 
-              // Navigate back to home to trigger reload
-              navigation.navigate("Home");
+                // Reset state
+                setProfilePhotoUri("");
+                setGender("male");
+                setAge("");
+                setWeight("");
+                setHeight("");
+                setStats({
+                  totalWorkouts: 0,
+                  totalPRs: 0,
+                  totalPhotos: 0,
+                  memberSince: stats.memberSince,
+                });
 
-              // Show alert after short delay
-              setTimeout(() => {
                 Alert.alert(
                   "Success",
-                  "All workout data has been cleared. You will need to complete onboarding again on next login."
+                  "All data has been deleted from your device and our servers.",
+                  [
+                    {
+                      text: "OK",
+                      onPress: () => {
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: "Landing" }],
+                        });
+                      },
+                    },
+                  ]
                 );
-              }, 100);
+              } else {
+                Alert.alert(
+                  "Error",
+                  "Failed to delete data from server. Please try again."
+                );
+              }
             } catch (error) {
               console.error("Error clearing data:", error);
-              Alert.alert("Error", "Failed to clear data");
+              Alert.alert("Error", "Failed to clear data. Please try again.");
+            } finally {
+              setLoading(false);
             }
           },
         },
@@ -411,6 +525,14 @@ function ProfilePage({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Updating...</Text>
+        </View>
+      )}
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -520,12 +642,17 @@ function ProfilePage({ navigation }) {
           <TouchableOpacity
             style={styles.dangerButton}
             onPress={handleClearData}
+            disabled={loading}
           >
             <MaterialIcons name="delete-sweep" size={24} color="#ff4444" />
-            <Text style={styles.dangerButtonText}>Clear All Workout Data</Text>
+            <Text style={styles.dangerButtonText}>Clear All Data</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            disabled={loading}
+          >
             <MaterialIcons name="logout" size={24} color="#fff" />
             <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
@@ -612,14 +739,23 @@ function ProfilePage({ navigation }) {
                       : "default"
                   }
                   autoFocus
+                  editable={!loading}
                 />
               )}
 
               <TouchableOpacity
-                style={styles.saveButton}
+                style={[
+                  styles.saveButton,
+                  loading && styles.saveButtonDisabled,
+                ]}
                 onPress={handleSaveEdit}
+                disabled={loading}
               >
-                <Text style={styles.saveButtonText}>Save Changes</Text>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
