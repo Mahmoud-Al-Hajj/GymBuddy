@@ -1,4 +1,5 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import React, { useEffect, useState } from "react";
@@ -13,6 +14,7 @@ import { useWorkouts } from "../hooks/useWorkouts";
 
 // Components
 import { AddWorkoutModal } from "../components/AddWorkoutModal";
+import RestTimer from "../components/RestTimer";
 import SearchBar from "../components/SearchBar";
 import StatCard from "../components/StatCard";
 import WorkoutCard from "../components/WorkoutCard";
@@ -54,9 +56,11 @@ function HomePage({ navigation }) {
   const [showAddWorkout, setShowAddWorkout] = useState(false);
   const [showWorkoutDetail, setShowWorkoutDetail] = useState(false);
   const [showEditExercise, setShowEditExercise] = useState(false);
+  const [showRestTimer, setShowRestTimer] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [restTimer, setRestTimer] = useState(90);
 
   const [workoutName, setWorkoutName] = useState("");
   const [exerciseName, setExerciseName] = useState("");
@@ -72,6 +76,7 @@ function HomePage({ navigation }) {
     loadPersonalBests();
     loadProgressPhotos();
     loadDefaults();
+    loadRestTimerSetting();
   }, []);
 
   // Reload on focus
@@ -97,6 +102,17 @@ function HomePage({ navigation }) {
       }
     } catch (error) {
       console.error("Error checking onboarding status:", error);
+    }
+  };
+
+  const loadRestTimerSetting = async () => {
+    try {
+      const savedRestTimer = await AsyncStorage.getItem("restTimer");
+      if (savedRestTimer) {
+        setRestTimer(parseInt(savedRestTimer));
+      }
+    } catch (error) {
+      console.error("Error loading rest timer:", error);
     }
   };
 
@@ -420,6 +436,28 @@ function HomePage({ navigation }) {
         weight={weight}
         setWeight={setWeight}
         weightUnit={weightUnit}
+      />
+
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          bottom: 100,
+          right: 20,
+          backgroundColor: Colors.primary,
+          paddingHorizontal: 15,
+          paddingVertical: 10,
+          borderRadius: 8,
+        }}
+        onPress={() => setShowRestTimer(true)}
+      >
+        <MaterialCommunityIcons name="timer" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      <RestTimer
+        visible={showRestTimer}
+        onClose={() => setShowRestTimer(false)}
+        defaultDuration={restTimer}
+        onComplete={() => setShowRestTimer(false)}
       />
     </View>
   );

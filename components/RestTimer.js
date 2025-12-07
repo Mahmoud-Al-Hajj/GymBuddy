@@ -1,6 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Audio } from "expo-av";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -12,38 +11,23 @@ import {
 } from "react-native";
 import { Colors } from "../constants/colors";
 
-/**
- * RestTimer Component
- * A professional rest timer that tracks rest periods between sets
- *
- * Features:
- * - Automatic countdown with visual progress
- * - Sound and vibration alerts when timer completes
- * - Pause/Resume functionality
- * - Quick adjust buttons (+15s, -15s)
- * - Skip timer option
- * - Persists across app states
- */
 export default function RestTimer({
   visible,
   onClose,
   onComplete,
-  defaultDuration = 90, // Default 90 seconds
+  defaultDuration = 90,
 }) {
   const [timeRemaining, setTimeRemaining] = useState(defaultDuration);
   const [totalDuration, setTotalDuration] = useState(defaultDuration);
   const [isRunning, setIsRunning] = useState(true);
   const [sound, setSound] = useState(null);
 
-  // Animation for progress circle
   const progressAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef(null);
 
-  // Load user's preferred rest timer duration
   useEffect(() => {
     loadRestTimerSetting();
     return () => {
-      // Cleanup
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
@@ -53,7 +37,6 @@ export default function RestTimer({
     };
   }, []);
 
-  // Start/Stop timer based on visibility and running state
   useEffect(() => {
     if (visible && isRunning) {
       startTimer();
@@ -64,7 +47,6 @@ export default function RestTimer({
     return () => stopTimer();
   }, [visible, isRunning]);
 
-  // Update progress animation when time changes
   useEffect(() => {
     const progress = timeRemaining / totalDuration;
     Animated.timing(progressAnim, {
@@ -88,7 +70,7 @@ export default function RestTimer({
   };
 
   const startTimer = () => {
-    stopTimer(); // Clear any existing timer
+    stopTimer();
 
     timerRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -111,21 +93,8 @@ export default function RestTimer({
   const handleTimerComplete = async () => {
     stopTimer();
 
-    // Vibrate phone
     Vibration.vibrate([0, 500, 200, 500]);
 
-    // Play sound
-    try {
-      const { sound: timerSound } = await Audio.Sound.createAsync(
-        require("../assets/sounds/timer-complete.mp3"), // You'll need to add this
-        { shouldPlay: true }
-      );
-      setSound(timerSound);
-    } catch (error) {
-      console.log("Could not play sound:", error);
-    }
-
-    // Call completion callback
     if (onComplete) {
       onComplete();
     }
@@ -136,7 +105,7 @@ export default function RestTimer({
   };
 
   const addTime = (seconds) => {
-    setTimeRemaining((prev) => Math.min(prev + seconds, 600)); // Max 10 minutes
+    setTimeRemaining((prev) => Math.min(prev + seconds, 600));
   };
 
   const skipTimer = () => {
@@ -149,15 +118,11 @@ export default function RestTimer({
     setIsRunning(true);
   };
 
-  // Format time as MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
-
-  // Calculate progress percentage
-  const progressPercentage = Math.round((timeRemaining / totalDuration) * 100);
 
   return (
     <Modal
@@ -181,7 +146,6 @@ export default function RestTimer({
             <View style={styles.timerCircle}>
               {/* Progress indicator could be added here with SVG */}
               <Text style={styles.timerText}>{formatTime(timeRemaining)}</Text>
-              <Text style={styles.percentageText}>{progressPercentage}%</Text>
             </View>
           </View>
 
@@ -250,6 +214,7 @@ const styles = {
     backgroundColor: "rgba(0, 0, 0, 0.9)",
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   timerContainer: {
     width: "90%",
