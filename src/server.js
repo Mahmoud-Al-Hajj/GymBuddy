@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.js";
 import workoutRoutes from "./routes/workout.js";
 import personalBestRoutes from "./routes/personalBest.js";
 import progressPhotoRoutes from "./routes/progressPhoto.js";
+import settingsRoutes from "./routes/settings.js";
 import { apiLimiter } from "./middleware/RateLimitter.js";
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/personal-bests", personalBestRoutes);
 app.use("/api/progress-photos", progressPhotoRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

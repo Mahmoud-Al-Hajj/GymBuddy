@@ -1,5 +1,6 @@
 import AuthService from "../services/AuthService.js";
 import UserService from "../services/UserService.js";
+import SettingsService from "../services/SettingsService.js";
 
 class UserController {
   constructor() {
@@ -57,6 +58,44 @@ class UserController {
       const id = req.user.id; // Get from token, not params
       await this.userService.deleteUser(id);
       res.status(204).send();
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getUserSettings(req, res) {
+    try {
+      const userId = req.user.id;
+      const settingsService = new SettingsService();
+      const settings = await settingsService.getSettingsByUserId(userId);
+      res.status(200).json(settings);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async updateUserSettings(req, res) {
+    try {
+      const userId = req.user.id;
+      const settingsService = new SettingsService();
+      const updatedSettings = await settingsService.updateUserSettings(
+        userId,
+        req.body
+      );
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async resetUserSettings(req, res) {
+    try {
+      const userId = req.user.id;
+      const settingsService = new SettingsService();
+      const resetSettings = await settingsService.resetUserSettingsToDefault(
+        userId
+      );
+      res.status(200).json(resetSettings);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
