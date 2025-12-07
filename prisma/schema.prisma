@@ -55,6 +55,10 @@ model users {
   height          Decimal?          @db.Decimal(5, 2)
   created_at      DateTime?         @default(now()) @db.Timestamp(6)
   updated_at      DateTime?         @default(now()) @db.Timestamp(6)
+  weight_unit     String?           @default("kg") @db.VarChar(10)
+  default_sets    Int?              @default(3)
+  default_reps    Int?              @default(12)
+  rest_timer      Int?              @default(60)
   personal_bests  personal_bests[]
   progress_photos progress_photos[]
   workouts        workouts[]

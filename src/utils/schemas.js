@@ -16,6 +16,10 @@ const updateUserSchema = Joi.object({
   age: Joi.number().integer().min(10).max(100).optional(),
   weight: Joi.number().positive().max(180).optional(),
   height: Joi.number().positive().max(250).optional(),
+  weight_unit: Joi.string().valid("kg", "lbs").optional(),
+  default_sets: Joi.number().integer().positive().optional(),
+  default_reps: Joi.number().integer().positive().optional(),
+  rest_timer: Joi.number().integer().positive().optional(),
 }).min(1); // At least one field must be provided
 
 const createWorkoutSchema = Joi.object({
