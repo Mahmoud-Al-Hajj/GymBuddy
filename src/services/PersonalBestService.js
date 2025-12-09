@@ -2,7 +2,6 @@ import prisma from "../../prisma/prisma.js";
 
 class PersonalBestService {
   async addPersonalBest(userId, workoutId, exerciseName, weight, reps) {
-    // Get all personal bests for this exercise from user's workouts
     const existingBest = await prisma.personal_bests.findFirst({
       where: {
         exercise_name: exerciseName,
@@ -12,7 +11,7 @@ class PersonalBestService {
       },
       orderBy: { weight: "desc" },
     });
-    
+
     // If no existing record OR new weight is higher, create new personal best
     if (!existingBest || weight > existingBest.weight) {
       return prisma.personal_bests.create({
