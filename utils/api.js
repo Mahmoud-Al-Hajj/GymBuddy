@@ -15,6 +15,20 @@ api.addAsyncRequestTransform(async (request) => {
     request.headers["Authorization"] = `Bearer ${token}`;
   }
 });
+api.addResponseTransform((response) => {
+  if (!response.ok) {
+    console.error(`API Error: [${response.status}]`, response.data);
+  }
+  return response;
+});
+
+api.addMonitor((response) => {
+  console.log(
+    `API Call: [${response.status}] ${response.config.method.toUpperCase()} ${
+      response.config.url
+    }`
+  );
+});
 
 // Auth APIs
 export const authAPI = {
@@ -30,7 +44,6 @@ export const profileAPI = {
   deleteProfile: () => api.delete("/users/profile"),
 };
 
-//  WORKOUT APIs
 export const workoutAPI = {
   createWorkout: (workoutData) => api.post("/workouts", workoutData),
   getWorkouts: () => api.get("/workouts"),
@@ -40,7 +53,6 @@ export const workoutAPI = {
   deleteWorkout: (workoutId) => api.delete(`/workouts/${workoutId}`),
 };
 
-//  EXERCISE APIs
 export const exerciseAPI = {
   addExercise: (workoutId, exerciseData) =>
     api.post(`/workouts/${workoutId}/exercises`, exerciseData),
@@ -52,7 +64,6 @@ export const exerciseAPI = {
     api.post(`/workouts/exercises/${exerciseId}/complete`, { completed }),
 };
 
-//  PERSONAL BEST APIs
 export const personalBestAPI = {
   addPersonalBest: (personalBestData) =>
     api.post("/personal-bests", personalBestData),
@@ -62,8 +73,6 @@ export const personalBestAPI = {
   deletePersonalBest: (personalBestId) =>
     api.delete(`/personal-bests/${personalBestId}`),
 };
-
-//  PROGRESS PHOTO APIs
 
 export const progressPhotoAPI = {
   addProgressPhoto: (formData) =>
