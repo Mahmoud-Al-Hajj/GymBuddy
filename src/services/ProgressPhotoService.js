@@ -4,7 +4,6 @@ class ProgressPhotoService {
   async addProgressPhoto(userId, workoutId, imageUrl) {
     return prisma.progress_photos.create({
       data: {
-        user_id: userId,
         workout_id: Number(workoutId),
         image_url: imageUrl,
       },
@@ -13,7 +12,11 @@ class ProgressPhotoService {
 
   async getProgressPhotos(userId) {
     return prisma.progress_photos.findMany({
-      where: { user_id: userId },
+      where: {
+        workouts: {
+          user_id: userId,
+        },
+      },
       orderBy: { date: "desc" },
     });
   }

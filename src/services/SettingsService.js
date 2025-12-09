@@ -1,4 +1,5 @@
 import prisma from "../../prisma/prisma.js";
+import { DEFAULT_SETTINGS } from "../utils/defaults.js";
 
 class SettingsService {
   async getUserSettings(userId) {
@@ -27,12 +28,8 @@ class SettingsService {
   }
 
   async resetUserSettingsToDefault(userId) {
-    const defaultSettings = {
-      weight_unit: "kg",
-      default_sets: 3,
-      default_reps: 10,
-      rest_timer: 60,
-    };
+    const defaultSettings = DEFAULT_SETTINGS;
+
     return prisma.users.update({
       where: { id: userId },
       data: defaultSettings,

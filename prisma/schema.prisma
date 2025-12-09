@@ -22,25 +22,21 @@ model exercises {
 
 model personal_bests {
   id            Int       @id @default(autoincrement())
-  user_id       Int?
   workout_id    Int?
   exercise_name String    @db.VarChar(255)
   weight        Decimal   @db.Decimal(6, 2)
   reps          Int
   date          DateTime? @default(now()) @db.Timestamp(6)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
-  users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   workouts      workouts? @relation(fields: [workout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model progress_photos {
   id         Int       @id @default(autoincrement())
-  user_id    Int?
   workout_id Int?
   image_url  String    @db.VarChar(500)
   date       DateTime? @default(now()) @db.Timestamp(6)
   created_at DateTime? @default(now()) @db.Timestamp(6)
-  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   workouts   workouts? @relation(fields: [workout_id], references: [id], onUpdate: NoAction)
 }
 
@@ -59,8 +55,6 @@ model users {
   default_sets    Int?              @default(3)
   default_reps    Int?              @default(12)
   rest_timer      Int?              @default(60)
-  personal_bests  personal_bests[]
-  progress_photos progress_photos[]
   workouts        workouts[]
 }
 
