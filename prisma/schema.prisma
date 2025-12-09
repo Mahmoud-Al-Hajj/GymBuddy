@@ -18,6 +18,8 @@ model exercises {
   created_at DateTime? @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
   workouts   workouts? @relation(fields: [workout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workout_id])
 }
 
 model personal_bests {
@@ -29,6 +31,10 @@ model personal_bests {
   date          DateTime? @default(now()) @db.Timestamp(6)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
   workouts      workouts? @relation(fields: [workout_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workout_id])
+  @@index([exercise_name])
+  @@index([weight])
 }
 
 model progress_photos {
@@ -38,24 +44,29 @@ model progress_photos {
   date       DateTime? @default(now()) @db.Timestamp(6)
   created_at DateTime? @default(now()) @db.Timestamp(6)
   workouts   workouts? @relation(fields: [workout_id], references: [id], onUpdate: NoAction)
+
+  @@index([workout_id])
+  @@index([date])
 }
 
 model users {
-  id              Int               @id @default(autoincrement())
-  email           String            @unique @db.VarChar(255)
-  password        String            @db.VarChar(255)
-  username        String?           @db.VarChar(100)
-  gender          String?           @db.VarChar(20)
-  age             Int?
-  weight          Decimal?          @db.Decimal(5, 2)
-  height          Decimal?          @db.Decimal(5, 2)
-  created_at      DateTime?         @default(now()) @db.Timestamp(6)
-  updated_at      DateTime?         @default(now()) @db.Timestamp(6)
-  weight_unit     String?           @default("kg") @db.VarChar(10)
-  default_sets    Int?              @default(3)
-  default_reps    Int?              @default(12)
-  rest_timer      Int?              @default(60)
-  workouts        workouts[]
+  id           Int        @id @default(autoincrement())
+  email        String     @unique @db.VarChar(255)
+  password     String     @db.VarChar(255)
+  username     String?    @db.VarChar(100)
+  gender       String?    @db.VarChar(20)
+  age          Int?
+  weight       Decimal?   @db.Decimal(5, 2)
+  height       Decimal?   @db.Decimal(5, 2)
+  created_at   DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?  @default(now()) @db.Timestamp(6)
+  weight_unit  String?    @default("kg") @db.VarChar(10)
+  default_sets Int?       @default(3)
+  default_reps Int?       @default(12)
+  rest_timer   Int?       @default(60)
+  workouts     workouts[]
+
+  @@index([created_at])
 }
 
 model workouts {
@@ -70,4 +81,8 @@ model workouts {
   personal_bests  personal_bests[]
   progress_photos progress_photos[]
   users           users?            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
+  @@index([date])
+  @@index([user_id, date])
 }
