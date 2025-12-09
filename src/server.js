@@ -27,6 +27,14 @@ app.use("/api/personal-bests", personalBestRoutes);
 app.use("/api/progress-photos", progressPhotoRoutes);
 app.use("/api/settings", settingsRoutes);
 
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({
+    error: err.message,
+    status: err.status || 500,
+  });
+});
+
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "ok",

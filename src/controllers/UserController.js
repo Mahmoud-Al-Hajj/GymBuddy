@@ -8,27 +8,27 @@ class UserController {
     this.userService = new UserService();
   }
 
-  async register(req, res) {
+  async register(req, res, next) {
     try {
       const { username, email, password } = req.body;
       const result = await this.authService.register(username, email, password);
       res.status(201).json(result);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const { email, password } = req.body;
       const result = await this.authService.login(email, password);
       res.status(200).json(result);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getUserById(req, res) {
+  async getUserById(req, res, next) {
     try {
       const id = req.user.id;
       const user = await this.userService.getUserById(parseInt(id));
@@ -38,43 +38,43 @@ class UserController {
         res.status(404).json({ error: "User not found" });
       }
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async updateUser(req, res) {
+  async updateUser(req, res, next) {
     try {
       const id = req.user.id; // Get from token, not params
       const updateData = req.body;
       const updatedUser = await this.userService.updateUser(id, updateData);
       res.status(200).json(updatedUser);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async deleteUser(req, res) {
+  async deleteUser(req, res, next) {
     try {
       const id = req.user.id; // Get from token, not params
       await this.userService.deleteUser(id);
       res.status(204).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getUserSettings(req, res) {
+  async getUserSettings(req, res, next) {
     try {
       const userId = req.user.id;
       const settingsService = new SettingsService();
       const settings = await settingsService.getSettingsByUserId(userId);
       res.status(200).json(settings);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async updateUserSettings(req, res) {
+  async updateUserSettings(req, res, next) {
     try {
       const userId = req.user.id;
       const settingsService = new SettingsService();
@@ -84,11 +84,11 @@ class UserController {
       );
       res.status(200).json(updatedSettings);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async resetUserSettings(req, res) {
+  async resetUserSettings(req, res, next) {
     try {
       const userId = req.user.id;
       const settingsService = new SettingsService();
@@ -97,7 +97,7 @@ class UserController {
       );
       res.status(200).json(resetSettings);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 }

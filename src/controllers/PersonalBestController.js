@@ -5,7 +5,7 @@ class PersonalBestController {
     this.personalBestService = new PersonalBestService();
   }
 
-  async addPersonalBest(req, res) {
+  async addPersonalBest(req, res, next) {
     try {
       const userId = req.user.id;
       const { workoutId, exerciseName, weight, reps } = req.body;
@@ -22,11 +22,11 @@ class PersonalBestController {
         res.status(200).json({ message: "Not a new personal best" });
       }
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getPersonalBests(req, res) {
+  async getPersonalBests(req, res, next) {
     try {
       const userId = req.user.id;
       const personalBests = await this.personalBestService.getPersonalBests(
@@ -34,11 +34,11 @@ class PersonalBestController {
       );
       res.status(200).json(personalBests);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getPersonalBestByExercise(req, res) {
+  async getPersonalBestByExercise(req, res, next) {
     try {
       const userId = req.user.id;
       const { exerciseName } = req.params;
@@ -53,17 +53,17 @@ class PersonalBestController {
         res.status(404).json({ message: "No personal best found" });
       }
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async deletePersonalBest(req, res) {
+  async deletePersonalBest(req, res, next) {
     try {
       const { id } = req.params;
       await this.personalBestService.deletePersonalBest(parseInt(id));
       res.status(204).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 }

@@ -5,7 +5,7 @@ class WorkoutController {
     this.workoutService = new WorkoutService();
   }
 
-  async createWorkout(req, res) {
+  async createWorkout(req, res, next) {
     try {
       const userId = req.user.id;
       const workoutData = req.body;
@@ -15,31 +15,31 @@ class WorkoutController {
       );
       res.status(201).json(workout);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getWorkoutsByUserId(req, res) {
+  async getWorkoutsByUserId(req, res, next) {
     try {
       const userId = req.user.id;
       const workouts = await this.workoutService.getWorkoutsByUserId(userId);
       res.status(200).json(workouts);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getWorkoutById(req, res) {
+  async getWorkoutById(req, res, next) {
     try {
       const { id } = req.params;
       const workout = await this.workoutService.getWorkoutById(parseInt(id));
       res.status(200).json(workout);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async updateWorkout(req, res) {
+  async updateWorkout(req, res, next) {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -49,20 +49,20 @@ class WorkoutController {
       );
       res.status(200).json(updatedWorkout);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
-  async deleteWorkout(req, res) {
+  async deleteWorkout(req, res, next) {
     try {
       const { id } = req.params;
       await this.workoutService.deleteWorkout(parseInt(id));
       res.status(204).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async addExercise(req, res) {
+  async addExercise(req, res, next) {
     try {
       const { workoutId } = req.params;
       const exerciseData = req.body;
@@ -72,11 +72,11 @@ class WorkoutController {
       );
       res.status(201).json(exercise);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async updateExercise(req, res) {
+  async updateExercise(req, res, next) {
     try {
       const { exerciseId } = req.params;
       const updateData = req.body;
@@ -86,21 +86,21 @@ class WorkoutController {
       );
       res.status(200).json(updatedExercise);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async deleteExercise(req, res) {
+  async deleteExercise(req, res, next) {
     try {
       const { exerciseId } = req.params;
       await this.workoutService.deleteExercise(parseInt(exerciseId));
       res.status(204).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async completeExercise(req, res) {
+  async completeExercise(req, res, next) {
     try {
       const { exerciseId } = req.params;
       const { completed } = req.body;
@@ -110,7 +110,7 @@ class WorkoutController {
       );
       res.status(200).json(updatedExercise);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 }

@@ -6,7 +6,7 @@ class ProgressPhotoController {
     this.progressPhotoService = new ProgressPhotoService();
   }
 
-  async addProgressPhoto(req, res) {
+  async addProgressPhoto(req, res, next) {
     try {
       const userId = req.user.id;
       const { workoutId } = req.body;
@@ -31,27 +31,27 @@ class ProgressPhotoController {
       );
       res.status(201).json(photo);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async getProgressPhotos(req, res) {
+  async getProgressPhotos(req, res, next) {
     try {
       const userId = req.user.id;
       const photos = await this.progressPhotoService.getProgressPhotos(userId);
       res.status(200).json(photos);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 
-  async deleteProgressPhoto(req, res) {
+  async deleteProgressPhoto(req, res, next) {
     try {
       const userId = req.user.id;
       await this.progressPhotoService.deleteProgressPhoto(userId);
       res.status(204).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      next(error);
     }
   }
 }
