@@ -37,14 +37,12 @@ export const useProgressPhotos = () => {
 
         const imageUri = result.assets[0].uri;
 
-        // Convert to file for multipart upload
         const file = {
           uri: imageUri,
           name: `photo_${Date.now()}.jpg`,
           type: "image/jpeg",
         };
 
-        // Prepare multipart/form-data
         const formData = new FormData();
         formData.append("image", file);
         formData.append("workoutId", workoutId);
