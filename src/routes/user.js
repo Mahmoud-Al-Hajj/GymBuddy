@@ -10,20 +10,102 @@ const router = express.Router();
 const userController = new UserController();
 const updateUserSchema = schemas.updateUserSchema;
 
-router.get("/profile", authMiddleware, async (req, res) => {
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 email:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 age:
+ *                   type: integer
+ *                 weight:
+ *                   type: number
+ *                 height:
+ *                   type: number
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get("/profile", authMiddleware, async (req, res, next) => {
   await userController.getUserById(req, res);
 });
+
+/**
+ * @swagger
+ * /users/profile:
+ *   post:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               age:
+ *                 type: integer
+ *               weight:
+ *                 type: number
+ *               height:
+ *                 type: number
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female]
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       422:
+ *         description: Validation error
+ */
 router.post(
   "/profile",
   authMiddleware,
   validate(updateUserSchema),
-  async (req, res) => {
-    await userController.updateUser(req, res);
+  async (req, res, next) => {
+    await userController.updateUser(req, res, next);
   }
 );
 
-router.delete("/profile", authMiddleware, async (req, res) => {
-  await userController.deleteUser(req, res);
+/**
+ * @swagger
+ * /users/profile:
+ *   delete:
+ *     summary: Delete user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: Account deleted successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete("/profile", authMiddleware, async (req, res, next) => {
+  await userController.deleteUser(req, res, next);
 });
 
 export default router;
