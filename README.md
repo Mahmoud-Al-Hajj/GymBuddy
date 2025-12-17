@@ -114,7 +114,6 @@ A production-ready Express.js REST API for the GymBuddy fitness tracking applica
 
 GymBuddy Server is a robust backend service that powers the GymBuddy mobile app. It handles user authentication, workout management, exercise tracking, personal records, progress photos, and user settings through a well-documented REST API.
 
-**Status**: ✅ Production Ready (v1.0)  
 
 ## Tech Stack
 
