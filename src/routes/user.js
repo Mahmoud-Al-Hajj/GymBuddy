@@ -44,7 +44,7 @@ const updateUserSchema = schemas.updateUserSchema;
  *         description: User not found
  */
 router.get("/profile", authMiddleware, async (req, res, next) => {
-  await userController.getUserById(req, res);
+  await userController.getUserById(req, res, next);
 });
 
 /**
