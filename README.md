@@ -106,7 +106,7 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 - **Expo Image** - Optimized image component
 
 
-# GymBuddy Server - Backend API
+# GymBuddy Server - Backend
 
 A production-ready Express.js REST API for the GymBuddy fitness tracking application. Provides secure workout tracking, personal records management, and user profile functionality with comprehensive API documentation.
 
