@@ -533,18 +533,6 @@ All errors return standardized JSON responses:
 }
 ```
 
-### Common HTTP Status Codes
-
-- **200 OK** - Request successful
-- **201 Created** - Resource created
-- **204 No Content** - Deleted successfully
-- **400 Bad Request** - Invalid input or validation error
-- **401 Unauthorized** - Missing or invalid authentication
-- **404 Not Found** - Resource not found
-- **422 Unprocessable Entity** - Validation failed
-- **429 Too Many Requests** - Rate limit exceeded
-- **500 Internal Server Error** - Server error
-
 ### Rate Limiting
 
 - **General API**: 100 requests per 15 minutes
