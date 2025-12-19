@@ -67,7 +67,7 @@ class UserController {
     try {
       const userId = req.user.id;
       const settingsService = new SettingsService();
-      const settings = await settingsService.getSettingsByUserId(userId);
+      const settings = await settingsService.getUserSettings(userId);
       res.status(200).json(settings);
     } catch (error) {
       next(error);
