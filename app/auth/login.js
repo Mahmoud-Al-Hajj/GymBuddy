@@ -16,6 +16,7 @@ import * as Yup from "yup";
 import Button from "../../components/Button.js";
 import TextInput from "../../components/TextInput.js";
 import { Colors } from "../../constants/colors.js";
+import { useAuth } from "../../hooks/useAuth";
 import { styles } from "../../styles/login.styles.js";
 import { authAPI } from "../../utils/api.js";
 
@@ -30,13 +31,13 @@ const loginValidationSchema = Yup.object().shape({
 
 function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleLogin = async (values) => {
     setLoading(true);
 
     try {
       const response = await authAPI.login(values.email, values.password);
-      console.log("Login response:", response.data);
 
       if (response.ok && response.data?.token) {
         const { token, user } = response.data;
@@ -48,17 +49,7 @@ function Login({ navigation }) {
           "onboardingCompleted"
         );
 
-        if (onboardingCompleted === "true") {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Home" }],
-          });
-        } else {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Onboarding" }],
-          });
-        }
+        await signIn(onboardingCompleted === "true");
       } else {
         const errorMessage =
           response.data?.message || "Invalid email or password";

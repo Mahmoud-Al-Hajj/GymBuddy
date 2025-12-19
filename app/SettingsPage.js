@@ -1,26 +1,19 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Modal,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../constants/colors.js";
+import { useAuth } from "../hooks/useAuth";
 import { styles } from "../styles/SettingsPage.styles.js";
 import { settingsAPI } from "../utils/api.js";
 
 function SettingsPage({ navigation }) {
+  const { signOut } = useAuth();
   const [weightUnit, setWeightUnit] = useState("kg");
   const [defaultSets, setDefaultSets] = useState(3);
   const [defaultReps, setDefaultReps] = useState(10);
-  const [restTimer, setRestTimer] = useState("");
+  const [restTimer, setRestTimer] = useState(90);
   const [tempValue, setTempValue] = useState("");
-  const [showRestTimerModal, setShowRestTimerModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalSettings, setOriginalSettings] = useState({});
 
@@ -38,13 +31,13 @@ function SettingsPage({ navigation }) {
         setWeightUnit(settings.weightUnit || "kg");
         setDefaultSets(settings.defaultSets || 3);
         setDefaultReps(settings.defaultReps || 12);
-        setRestTimer(settings.restTimer?.toString() || "90");
+        setRestTimer(settings.restTimer || 90);
 
         setOriginalSettings({
           weightUnit: settings.weightUnit || "kg",
           defaultSets: settings.defaultSets || 3,
           defaultReps: settings.defaultReps || 12,
-          restTimer: settings.restTimer?.toString() || "90",
+          restTimer: settings.restTimer || 90,
         });
 
         // Also save to AsyncStorage for offline access
@@ -77,7 +70,8 @@ function SettingsPage({ navigation }) {
         setDefaultSets(parseInt(localSettings.defaultSets));
       if (localSettings.defaultReps)
         setDefaultReps(parseInt(localSettings.defaultReps));
-      if (localSettings.restTimer) setRestTimer(localSettings.restTimer);
+      if (localSettings.restTimer)
+        setRestTimer(parseInt(localSettings.restTimer));
     }
   };
 
@@ -145,16 +139,20 @@ function SettingsPage({ navigation }) {
     }
   };
 
-  const handleSaveRestTimer = async () => {
-    if (!tempValue || parseInt(tempValue) < 10 || parseInt(tempValue) > 600) {
-      Alert.alert("Invalid Input", "Please enter seconds between 10 and 600");
-      return;
+  const incrementRestTimer = async () => {
+    if (restTimer < 600) {
+      const newValue = restTimer + 15;
+      setRestTimer(newValue);
+      setHasUnsavedChanges(true);
     }
+  };
 
-    setRestTimer(tempValue);
-    setHasUnsavedChanges(true);
-    setShowRestTimerModal(false);
-    Alert.alert("Success", `Rest timer set to ${tempValue} seconds`);
+  const decrementRestTimer = async () => {
+    if (restTimer > 15) {
+      const newValue = restTimer - 15;
+      setRestTimer(newValue);
+      setHasUnsavedChanges(true);
+    }
   };
 
   const handleSaveSettings = async () => {
@@ -169,13 +167,11 @@ function SettingsPage({ navigation }) {
       console.log("handleSaveSettings response:", response);
 
       if (response.ok) {
-        // Save to AsyncStorage
         await AsyncStorage.setItem("weightUnit", weightUnit);
         await AsyncStorage.setItem("defaultSets", defaultSets.toString());
         await AsyncStorage.setItem("defaultReps", defaultReps.toString());
-        await AsyncStorage.setItem("restTimer", restTimer);
+        await AsyncStorage.setItem("restTimer", restTimer.toString());
 
-        // Update original settings to match current settings
         const newOriginalSettings = {
           weightUnit,
           defaultSets,
@@ -205,11 +201,10 @@ function SettingsPage({ navigation }) {
           text: "Discard",
           style: "destructive",
           onPress: () => {
-            console.log("Discarding changes, restoring to:", originalSettings);
             setWeightUnit(originalSettings.weightUnit || "kg");
             setDefaultSets(originalSettings.defaultSets || 3);
             setDefaultReps(originalSettings.defaultReps || 12);
-            setRestTimer(originalSettings.restTimer || "90");
+            setRestTimer(originalSettings.restTimer || 90);
             setHasUnsavedChanges(false);
           },
         },
@@ -228,12 +223,10 @@ function SettingsPage({ navigation }) {
         style: "destructive",
         onPress: async () => {
           try {
-            // Reset on backend
             const response = await settingsAPI.resetSettings();
             console.log("resetSettings response:", response);
 
             if (response.ok) {
-              // Clear AsyncStorage
               await AsyncStorage.multiRemove([
                 "weightUnit",
                 "defaultSets",
@@ -241,11 +234,10 @@ function SettingsPage({ navigation }) {
                 "restTimer",
               ]);
 
-              // Reset state to defaults
               setWeightUnit("kg");
               setDefaultSets(3);
               setDefaultReps(12);
-              setRestTimer("90");
+              setRestTimer(90);
 
               Alert.alert("Success", "Settings reset to defaults");
             }
@@ -258,49 +250,18 @@ function SettingsPage({ navigation }) {
     ]);
   };
 
-  const SettingModal = ({
-    visible,
-    onClose,
-    title,
-    value,
-    onSave,
-    placeholder,
-    keyboardType = "numeric",
-  }) => (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <MaterialIcons name="close" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.modalBody}>
-            <TextInput
-              style={styles.modalInput}
-              value={tempValue}
-              onChangeText={setTempValue}
-              placeholder={placeholder}
-              placeholderTextColor="#666"
-              keyboardType={keyboardType}
-              autoFocus
-            />
-
-            <TouchableOpacity style={styles.saveButton} onPress={onSave}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await signOut();
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
@@ -431,16 +392,10 @@ function SettingsPage({ navigation }) {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.settingRow}
-            onPress={() => {
-              setTempValue(restTimer);
-              setShowRestTimerModal(true);
-            }}
-          >
+          <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <MaterialCommunityIcons
-                name="timer"
+                name="timer-outline"
                 size={24}
                 color={Colors.primary}
               />
@@ -451,11 +406,24 @@ function SettingsPage({ navigation }) {
                 </Text>
               </View>
             </View>
-            <View style={styles.valueContainer}>
-              <Text style={styles.valueText}>{restTimer}s</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
+            <View style={styles.timerContainer}>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={decrementRestTimer}
+              >
+                <MaterialIcons name="remove" size={20} color="#fff" />
+              </TouchableOpacity>
+              <View style={styles.timerValueContainer}>
+                <Text style={styles.timerValue}>{restTimer}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={incrementRestTimer}
+              >
+                <MaterialIcons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         </View>
 
         {/* About section */}
@@ -503,12 +471,21 @@ function SettingsPage({ navigation }) {
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingRow} onPress={handleLogout}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="logout" size={24} color="#EF5350" />
+              <Text style={[styles.settingLabel, { color: "#EF5350" }]}>
+                Logout
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
+          </TouchableOpacity>
         </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* NEW: Save/Discard buttons at bottom */}
       {hasUnsavedChanges && (
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
@@ -519,23 +496,13 @@ function SettingsPage({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.saveButton}
+            style={styles.saveSettingsButton}
             onPress={handleSaveSettings}
           >
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveSettingsButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
       )}
-
-      {/* Modals */}
-      <SettingModal
-        visible={showRestTimerModal}
-        onClose={() => setShowRestTimerModal(false)}
-        title="Rest Timer"
-        value={restTimer}
-        onSave={handleSaveRestTimer}
-        placeholder="Enter seconds (10-600)"
-      />
     </View>
   );
 }

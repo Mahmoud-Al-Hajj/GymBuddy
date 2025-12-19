@@ -101,6 +101,28 @@ export const styles = StyleSheet.create({
     minWidth: 40,
     textAlign: "center",
   },
+  timerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  timerValueContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
+    minWidth: 50,
+    justifyContent: "center",
+  },
+  timerValue: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  timerUnit: {
+    fontSize: 14,
+    color: "#888",
+    fontWeight: "500",
+  },
   versionText: {
     fontSize: 14,
     color: "#888",
@@ -194,16 +216,16 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  saveButton: {
+  saveSettingsButton: {
     flex: 2,
     paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: Colors.primary,
     alignItems: "center",
   },
-  saveButtonText: {
-    color: "#fff",
+  saveSettingsButtonText: {
+    color: "#000",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
 });

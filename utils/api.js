@@ -2,12 +2,18 @@ import { create } from "apisauce";
 import * as SecureStore from "expo-secure-store";
 
 const api = create({
-  baseURL: "http://192.168.18.79:3000/api",
+  baseURL: "https://gymbuddy-74oz.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
+
+let logoutCallback = null;
+
+export const setLogoutCallback = (callback) => {
+  logoutCallback = callback;
+};
 
 api.addAsyncRequestTransform(async (request) => {
   const token = await SecureStore.getItemAsync("userToken");
@@ -15,10 +21,16 @@ api.addAsyncRequestTransform(async (request) => {
     request.headers["Authorization"] = `Bearer ${token}`;
   }
 });
-api.addResponseTransform((response) => {
+
+api.addResponseTransform(async (response) => {
   if (!response.ok) {
     console.error(`API Error: [${response.status}]`, response.data);
   }
+
+  if (response.status === 401 && logoutCallback) {
+    await logoutCallback();
+  }
+
   return response;
 });
 

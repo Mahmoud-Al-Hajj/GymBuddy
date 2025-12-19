@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
@@ -12,11 +11,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useAuth } from "../hooks/useAuth";
 import { styles } from "../styles/Onboarding.styles.js";
 import { profileAPI } from "../utils/api.js";
 
 function Onboarding({ navigation }) {
-  const router = useRouter();
+  const { signIn } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [gender, setGender] = useState("");
   const [age, setAge] = useState(35);
@@ -27,7 +27,6 @@ function Onboarding({ navigation }) {
       setCurrentStep(currentStep + 1);
     } else {
       try {
-        // Call API to update user profile
         const response = await profileAPI.updateProfile({
           gender,
           age: parseInt(age),
@@ -43,19 +42,18 @@ function Onboarding({ navigation }) {
           );
           await SecureStore.setItemAsync("onboardingCompleted", "true");
 
-          console.log("💾 Saved to SecureStore");
+          console.log("✅ Onboarding completed successfully");
 
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Home" }],
-          });
+          await signIn(true);
         } else {
           const errorMessage =
             response.data?.error ||
             response.data?.message ||
             "Failed to update profile";
+          Alert.alert("Error", errorMessage);
         }
       } catch (error) {
+        console.error("Onboarding error:", error);
         Alert.alert("Error", "Something went wrong. Please try again.");
       }
     }
