@@ -8,50 +8,36 @@ export default {
     slug: "GymBuddy",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
     scheme: "gymbuddy",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
+      bundleIdentifier: "com.mahjooj.gymbuddy",
       supportsTablet: true,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
-      adaptiveIcon: {
-        backgroundColor: "#E6F4FE",
-        foregroundImage: "./assets/images/android-icon-foreground.png",
-        backgroundImage: "./assets/images/android-icon-background.png",
-        monochromeImage: "./assets/images/android-icon-monochrome.png",
-      },
+      package: "com.mahjooj.gymbuddy",
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
     },
     web: {
       output: "static",
-      favicon: "./assets/images/favicon.png",
     },
-    plugins: [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
-          resizeMode: "contain",
-          backgroundColor: "#ffffff",
-          dark: {
-            backgroundColor: "#000000",
-          },
-        },
-      ],
-      "expo-font",
-    ],
+    plugins: ["expo-router", "expo-font"],
     experiments: {
       typedRoutes: true,
       reactCompiler: true,
     },
     extra: {
+      eas: {
+        projectId: "f955b933-c29a-4419-8267-45d96c93ee05",
+      },
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY,
+      apiUrl: "https://gymbuddy-74oz.onrender.com/api",
     },
   },
 };
