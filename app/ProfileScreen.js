@@ -648,14 +648,14 @@ function ProfilePage({ navigation }) {
             <Text style={styles.dangerButtonText}>Clear All Data</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.logoutButton}
             onPress={handleLogout}
             disabled={loading}
           >
             <MaterialIcons name="logout" size={24} color="#fff" />
             <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={{ height: 40 }} />
