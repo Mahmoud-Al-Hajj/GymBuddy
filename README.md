@@ -41,20 +41,23 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 |  <img src="https://github.com/user-attachments/assets/073464e5-f0b7-4d5a-a706-c80878302df1" width="200"/> | <img src="https://github.com/user-attachments/assets/8f8a55ea-784a-49e0-ae81-e74c8544a38a" width="200"/> | <img src="https://github.com/user-attachments/assets/785cfdc1-532d-4303-95e2-fdeabffa0c3b" width="200"/> |
 
 ### Core Features
-| Home (Empty) |Home (With Workouts) | Workout Creation | Progress |
-|:----:|:-------:|:--------:|:--------:|
-| <img src="https://github.com/user-attachments/assets/69e62ab8-be6f-4541-9658-36ddc94dee0d" width="200"/> | <img src="https://github.com/user-attachments/assets/b26bd186-f788-4595-bb15-bd1a8480b418" width="200"/> | <img src="https://github.com/user-attachments/assets/0339f9f2-f900-4685-8dc9-cc7aa7d5701b" width="200"/> | <img src="https://github.com/user-attachments/assets/bcee1630-ee11-429e-821c-8e0d889d39a3" width="200"/> |
+| Home (Empty) |Home (With Workouts) | Workout Creation | Progress | Rest Timer |
+|:----:|:-------:|:--------:|:--------:|:--------:|
+| <img src="https://github.com/user-attachments/assets/69e62ab8-be6f-4541-9658-36ddc94dee0d" width="200"/> | <img src="https://github.com/user-attachments/assets/b26bd186-f788-4595-bb15-bd1a8480b418" width="200"/> | <img src="https://github.com/user-attachments/assets/0339f9f2-f900-4685-8dc9-cc7aa7d5701b" width="200"/> | <img src="https://github.com/user-attachments/assets/bcee1630-ee11-429e-821c-8e0d889d39a3" width="200"/> | <img src="https://github.com/user-attachments/assets/f0d9d28b-bd4d-41c7-8829-bfe30c0d2378" width="200"/> |
+
 
 
 ### Profile
 | Profile | Profile |
 |:------------:|:------------:|
-| <img src="https://github.com/user-attachments/assets/d7a549c5-854d-4644-9f45-1361f0ae627b" width="200"/> | <img src="https://github.com/user-attachments/assets/83925b2b-0b4d-4e5a-bc48-52ec641fa72d" width="200"/> |
+| <img src="https://github.com/user-attachments/assets/d7a549c5-854d-4644-9f45-1361f0ae627b" width="200"/> | <img src="https://github.com/user-attachments/assets/8138f3a1-8718-49fc-88c8-496d91079d08" width="200"/> |
 
 ### Settings
-| Settings |
-|:--------:|
-| <img src="https://github.com/user-attachments/assets/9fe5ef31-f6c6-43e5-b553-147bb01fd761" width="200"/> |
+| Settings | Settings |
+|:------------:|:------------:|
+| <img src="https://github.com/user-attachments/assets/9fe5ef31-f6c6-43e5-b553-147bb01fd761" width="200"/> | <img src="https://github.com/user-attachments/assets/4ed0b3ed-e462-488c-8939-218982f86527" width="200"/> |
+
+
 
 ###  Progress Photos
 
