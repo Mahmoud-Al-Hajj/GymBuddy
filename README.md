@@ -141,7 +141,6 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 | **Form Handling**    | Formik + Yup                  |
 | **Storage**          | AsyncStorage + SecureStore    |
 | **Media**            | Expo Image Picker             |
-| **Animations**       | Lottie, React Native Animated |
 | **Icons**            | @expo/vector-icons            |
 | **Styling**          | StyleSheet (React Native)     |
 
