@@ -8,6 +8,7 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [onboardingFlag, setOnboardingFlag] = useState(0);
 
   useEffect(() => {
     checkAuthStatus();
@@ -38,6 +39,9 @@ export default function AuthProvider({ children }) {
       const email = await SecureStore.getItemAsync("userEmail");
       setUser({ email });
       setIsAuthenticated(true);
+      if (hasCompletedOnboarding) {
+        setOnboardingFlag((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Sign in failed:", error);
       throw error;
@@ -59,6 +63,7 @@ export default function AuthProvider({ children }) {
     user,
     isAuthenticated,
     isLoading,
+    onboardingFlag,
     signIn,
     signOut,
   };

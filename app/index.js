@@ -15,21 +15,23 @@ import SettingsPage from "./SettingsPage";
 const Stack = createStackNavigator();
 
 function Navigation() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const { isAuthenticated, isLoading, onboardingFlag } = useAuth();
+  const [onboardingCompleted, setOnboardingCompleted] = useState(null);
 
   useEffect(() => {
     const checkOnboarding = async () => {
-      const completed = await SecureStore.getItemAsync("onboardingCompleted");
-      setOnboardingCompleted(completed === "true");
+      if (isAuthenticated) {
+        const completed = await SecureStore.getItemAsync("onboardingCompleted");
+        setOnboardingCompleted(completed === "true");
+      } else {
+        setOnboardingCompleted(null);
+      }
     };
 
-    if (isAuthenticated) {
-      checkOnboarding();
-    }
-  }, [isAuthenticated]);
+    checkOnboarding();
+  }, [isAuthenticated, onboardingFlag]);
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && onboardingCompleted === null)) {
     return (
       <View
         style={{
