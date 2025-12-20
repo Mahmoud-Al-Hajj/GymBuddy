@@ -51,9 +51,10 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 
 ###  Authentication
 
-| Landing | Login |
-|:-------:|:-----:|
-| <img src="https://github.com/user-attachments/assets/1f0271fe-1c99-4c54-878d-434f764a9189" width="200"/> | <img src="https://github.com/user-attachments/assets/7aa8040b-9d45-4b72-8265-69ffaa15a181" width="200"/> |
+| Landing | Login | Register |
+|:-------:|:-----:|:-----:|
+| <img src="https://github.com/user-attachments/assets/1f0271fe-1c99-4c54-878d-434f764a9189" width="200"/> | <img src="https://github.com/user-attachments/assets/7aa8040b-9d45-4b72-8265-69ffaa15a181" width="200"/> | <img src="https://github.com/user-attachments/assets/9b613da5-9c13-4c45-8fd0-62d3440337e0" width="200"/> 
+
 
 ###  Onboarding
 | Gender Selection | Age Selection | Weight Selection |
