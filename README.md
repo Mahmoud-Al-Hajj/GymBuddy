@@ -26,6 +26,26 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
   - First Workout, 10 Workouts, 25 Workouts, 50 Workouts
   - First PR, 10 PRs, 25 PRs
   - Photo Fanatic (10+ progress photos)
+    
+ ### Rest Timer Features
+- **Adjustable Duration**: Customize rest periods from 15 seconds to 10 minutes
+- **Dynamic Controls**: Pause, resume, add/remove time mid-countdown
+- **Visual Feedback**: Animated circular progress indicator
+- **Haptic Alerts**: Vibration patterns when timer completes
+- **Quick Actions**: Reset or skip rest periods instantly
+  
+### Advanced Settings
+- **Configurable Defaults**: Set preferred sets, reps, and rest durations
+- **Change Detection**: Warns before leaving with unsaved modifications
+- **Granular Controls**: Fine-tune every aspect of your workout experience
+- **Settings Persistence**: Preferences saved across devices
+
+### Performance & Reliability
+- **Optimized Loading**: Parallel API requests for faster data retrieval
+- **Token Validation**: Automatic session verification on app launch
+- **Error Recovery**: User-friendly error handling with retry options
+- **Smart Caching**: Reduced data usage with intelligent local storage
+
   
 ## Screenshots
 
@@ -108,6 +128,45 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 - **Expo Image Picker** - Camera and photo library access
 - **Expo Image** - Optimized image component
 
+## Tech Stack - Frontend
+
+| Category             | Technology                    |
+| -------------------- | ----------------------------- |
+| **Framework**        | React Native (Expo)           |
+| **Runtime**          | Expo SDK ~54.0                |
+| **Navigation**       | React Navigation 7.x          |
+| **State Management** | React Hooks (Context API)     |
+| **HTTP Client**      | apisauce 3.2.2                |
+| **Form Handling**    | Formik + Yup                  |
+| **Storage**          | AsyncStorage + SecureStore    |
+| **Media**            | Expo Image Picker             |
+| **Animations**       | Lottie, React Native Animated |
+| **Icons**            | @expo/vector-icons            |
+| **Styling**          | StyleSheet (React Native)     |
+
+
+## Installation - Frontend
+
+### 1. Clone Repository (if not already done)
+
+```bash
+git clone <your-repo-url>
+cd GymBuddy
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+
+### 3. Start Development Server
+
+```bash
+npx expo start
+```
+---
 
 # GymBuddy Server - Backend
 
