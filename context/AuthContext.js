@@ -21,14 +21,13 @@ export default function AuthProvider({ children }) {
 
   const checkAuthStatus = async () => {
     const startTime = Date.now();
-    const MIN_LOADING_TIME = 500; // Minimum 500ms to prevent flash
+    const MIN_LOADING_TIME = 500;
 
     try {
       const token = await SecureStore.getItemAsync("userToken");
       const email = await SecureStore.getItemAsync("userEmail");
 
       if (token && email) {
-        // Validate token with backend
         const response = await profileAPI.getProfile();
 
         if (response.ok && response.data) {
@@ -36,12 +35,11 @@ export default function AuthProvider({ children }) {
           setIsAuthenticated(true);
           setAuthError(null);
         } else {
-          // Token is invalid or expired
           console.warn("Token validation failed, clearing credentials");
           await clearAuthData();
         }
       } else {
-        // No token - this is normal for first-time users, don't set error
+        // No token
         setIsAuthenticated(false);
         setUser(null);
       }
@@ -54,7 +52,6 @@ export default function AuthProvider({ children }) {
       }
       await clearAuthData();
     } finally {
-      // Ensure minimum loading time to prevent flashing
       const elapsedTime = Date.now() - startTime;
       const remainingTime = MIN_LOADING_TIME - elapsedTime;
 
@@ -86,7 +83,6 @@ export default function AuthProvider({ children }) {
         throw new Error("Missing authentication credentials");
       }
 
-      // Fetch user profile from backend after successful login
       const response = await profileAPI.getProfile();
 
       if (response.ok && response.data) {

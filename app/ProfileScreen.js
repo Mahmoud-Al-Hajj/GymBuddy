@@ -396,11 +396,9 @@ function ProfilePage({ navigation }) {
           onPress: async () => {
             setLoading(true);
             try {
-              // Delete profile from backend
               const response = await profileAPI.deleteProfile();
 
               if (response.ok) {
-                // Clear local data
                 await AsyncStorage.removeItem("workouts");
                 await SecureStore.deleteItemAsync("userGender");
                 await SecureStore.deleteItemAsync("userAge");
@@ -408,7 +406,6 @@ function ProfilePage({ navigation }) {
                 await SecureStore.deleteItemAsync("userHeight");
                 await SecureStore.deleteItemAsync("profilePhotoUri");
 
-                // Reset state
                 setProfilePhotoUri("");
                 setGender("male");
                 setAge("");
