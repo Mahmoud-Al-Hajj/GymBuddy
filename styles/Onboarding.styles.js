@@ -132,7 +132,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingBottom: 60,
     gap: 16,
   },
   backButton: {

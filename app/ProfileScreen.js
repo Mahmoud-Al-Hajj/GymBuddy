@@ -18,6 +18,7 @@ import InfoRow from "../components/InfoRow.js";
 import ProfileCard from "../components/ProfileCard.js";
 import StatsGrid from "../components/StatsGrid.js";
 import { Colors } from "../constants/colors.js";
+import { useAuth } from "../hooks/useAuth";
 import { usePersonalBests } from "../hooks/usePersonalBests";
 import { useProgressPhotos } from "../hooks/useProgressPhotos";
 import { useWorkouts } from "../hooks/useWorkouts";
@@ -25,7 +26,7 @@ import { styles } from "../styles/ProfileScreen.styles.js";
 import { profileAPI } from "../utils/api.js";
 
 function ProfilePage({ navigation }) {
-  // Use hooks for live data
+  const { signOut } = useAuth();
   const { workouts, loadWorkouts } = useWorkouts();
   const { personalBests, loadPersonalBests } = usePersonalBests();
   const { progressPhotos, loadProgressPhotos } = useProgressPhotos();
@@ -377,17 +378,7 @@ function ProfilePage({ navigation }) {
         text: "Logout",
         style: "destructive",
         onPress: async () => {
-          try {
-            await SecureStore.deleteItemAsync("userToken");
-            await SecureStore.deleteItemAsync("userEmail");
-
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Landing" }],
-            });
-          } catch (error) {
-            console.error("Error logging out:", error);
-          }
+          await signOut();
         },
       },
     ]);
@@ -415,7 +406,6 @@ function ProfilePage({ navigation }) {
                 await SecureStore.deleteItemAsync("userAge");
                 await SecureStore.deleteItemAsync("userWeight");
                 await SecureStore.deleteItemAsync("userHeight");
-                await SecureStore.deleteItemAsync("onboardingCompleted");
                 await SecureStore.deleteItemAsync("profilePhotoUri");
 
                 // Reset state
@@ -437,11 +427,8 @@ function ProfilePage({ navigation }) {
                   [
                     {
                       text: "OK",
-                      onPress: () => {
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: "Landing" }],
-                        });
+                      onPress: async () => {
+                        await signOut();
                       },
                     },
                   ]

@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
@@ -45,6 +46,9 @@ function Onboarding({ navigation }) {
           console.log("✅ Onboarding completed successfully");
 
           await signIn(true);
+
+          // Navigate to home after completion
+          router.replace("/");
         } else {
           const errorMessage =
             response.data?.error ||

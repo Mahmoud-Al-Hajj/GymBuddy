@@ -55,14 +55,14 @@ export const useProgressPhotos = () => {
 
         if (res.ok) {
           await loadProgressPhotos();
-          alert("Photo added successfully!");
+          return { success: true };
         } else {
           console.error("Failed to upload photo:", res);
-          alert("Failed to upload photo.");
+          return { success: false, error: "Failed to upload photo" };
         }
       } catch (error) {
         console.error("Error adding progress photo:", error);
-        alert("Error adding photo: " + error.message);
+        return { success: false, error: error.message };
       }
     },
     [loadProgressPhotos]

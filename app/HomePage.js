@@ -23,6 +23,7 @@ import { WorkoutDetailModal } from "../components/WorkoutDetailModal";
 // Utils
 import { Colors } from "../constants/colors";
 import { styles } from "../styles/HomePage.styles";
+import { personalBestAPI, progressPhotoAPI } from "../utils/api";
 import {
   filterWorkouts,
   formatDate,
@@ -249,29 +250,45 @@ function HomePage({ navigation }) {
   };
 
   const refreshWorkoutDetail = async (workoutId) => {
-    await loadWorkouts();
-    await loadPersonalBests();
-    await loadProgressPhotos();
+    // Fetch only what we need in parallel for speed
+    const [updatedWorkout, freshPhotosRes, freshPRsRes] = await Promise.all([
+      getWorkoutById(workoutId),
+      progressPhotoAPI.getProgressPhotos(),
+      personalBestAPI.getPersonalBests(),
+    ]);
 
-    const updatedWorkout = await getWorkoutById(workoutId);
+    const freshPhotos = Array.isArray(freshPhotosRes.data)
+      ? freshPhotosRes.data
+      : [];
+    const freshPRs = Array.isArray(freshPRsRes.data) ? freshPRsRes.data : [];
+
     if (updatedWorkout) {
       setSelectedWorkout({
         ...updatedWorkout,
-        personal_bests: personalBests.filter(
-          (pb) => pb.workout_id === workoutId
-        ),
-        progress_photos: progressPhotos.filter(
+        personal_bests: freshPRs.filter((pb) => pb.workout_id === workoutId),
+        progress_photos: freshPhotos.filter(
           (photo) => photo.workout_id === workoutId
         ),
       });
     }
+
+    // Update background state (non-blocking for modal display)
+    loadWorkouts();
+    loadPersonalBests();
+    loadProgressPhotos();
   };
 
   const handleAddPhoto = async (workoutId) => {
     try {
-      await addProgressPhoto(workoutId);
-      await refreshWorkoutDetail(workoutId);
-      Alert.alert("Success", "Photo added successfully!");
+      const result = await addProgressPhoto(workoutId);
+
+      if (result?.success) {
+        // Refresh immediately - no delay needed with parallel requests
+        await refreshWorkoutDetail(workoutId);
+        Alert.alert("Success", "Photo added successfully!");
+      } else {
+        Alert.alert("Error", result?.error || "Failed to add photo");
+      }
     } catch (error) {
       console.error("Error adding photo:", error);
       Alert.alert("Error", "Failed to add photo");
