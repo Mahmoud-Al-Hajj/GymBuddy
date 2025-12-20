@@ -21,6 +21,7 @@ export default function RestTimer({
   const [totalDuration, setTotalDuration] = useState(defaultDuration);
   const [isRunning, setIsRunning] = useState(true);
   const [sound, setSound] = useState(null);
+  const [hasCompleted, setHasCompleted] = useState(false);
 
   const progressAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef(null);
@@ -55,6 +56,14 @@ export default function RestTimer({
       useNativeDriver: true,
     }).start();
   }, [timeRemaining, totalDuration]);
+
+  // Handle completion in a separate effect to avoid setState during render
+  useEffect(() => {
+    if (hasCompleted && onComplete) {
+      onComplete();
+      setHasCompleted(false);
+    }
+  }, [hasCompleted, onComplete]);
 
   const loadRestTimerSetting = async () => {
     try {
@@ -95,9 +104,8 @@ export default function RestTimer({
 
     Vibration.vibrate([0, 500, 200, 500]);
 
-    if (onComplete) {
-      onComplete();
-    }
+    // Set flag instead of calling onComplete directly
+    setHasCompleted(true);
   };
 
   const togglePause = () => {
