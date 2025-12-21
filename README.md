@@ -379,6 +379,10 @@ Start the server and visit:
 ```
 http://localhost:3000/api-docs
 ```
+**No need to start the server its already deployed but it might take time to load because of the deployment on render (the server sleeps if there is no much activity)**
+```
+https://gymbuddy-74oz.onrender.com/api-docs/
+```
 
 Interactive API documentation with:
 
