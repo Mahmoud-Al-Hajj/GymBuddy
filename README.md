@@ -173,6 +173,10 @@ GymBuddy is a feature-rich workout tracking application that empowers users to l
 
 ## Installation - Frontend
 
+## Android Build Download
+
+Android users can download the latest APK build here: https://expo.dev/accounts/mahjooj/projects/GymBuddy/builds/d5c931ec-05fb-455a-ae9e-7be097b53f8e
+
 ### 1. Clone Repository (if not already done)
 
 ```bash
@@ -193,6 +197,7 @@ npm install
 npx expo start
 ```
 ---
+
 
 # GymBuddy Server - Backend (Deployed)
 
