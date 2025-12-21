@@ -168,7 +168,7 @@ npx expo start
 ```
 ---
 
-# GymBuddy Server - Backend
+# GymBuddy Server - Backend (Deployed)
 
 A production-ready Express.js REST API for the GymBuddy fitness tracking application. Provides secure workout tracking, personal records management, and user profile functionality with comprehensive API documentation.
 
