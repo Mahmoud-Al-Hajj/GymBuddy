@@ -227,7 +227,7 @@ GymBuddy Server is a robust backend service that powers the GymBuddy mobile app.
 
 ## Features
 
-### ✅ Security
+### Security
 
 - **Helmet** security headers (15+ HTTP headers)
 - **CORS** with explicit origin validation
@@ -239,7 +239,7 @@ GymBuddy Server is a robust backend service that powers the GymBuddy mobile app.
 - **Input Validation** with Joi schemas
 - **Error Sanitization** (no stack traces to client)
 
-### ✅ API Documentation
+### API Documentation
 
 - **Swagger UI** at `/api-docs`
 - **OpenAPI 3.0** specification
@@ -248,7 +248,7 @@ GymBuddy Server is a robust backend service that powers the GymBuddy mobile app.
 - **Error Codes** documented
 - **Authentication** marked on protected endpoints
 
-### ✅ Core Functionality
+### Core Functionality
 
 - User registration and authentication
 - Profile management (CRUD)
@@ -259,7 +259,7 @@ GymBuddy Server is a robust backend service that powers the GymBuddy mobile app.
 - User settings and preferences
 - Health check endpoints
 
-### ✅ Logging & Monitoring
+### Logging & Monitoring
 
 - **Winston** structured logging
 - Console and file output
@@ -268,7 +268,7 @@ GymBuddy Server is a robust backend service that powers the GymBuddy mobile app.
 - Error logging with stack traces
 - Graceful shutdown handlers
 
-### ✅ Database
+### Database
 
 - **Prisma ORM** with PostgreSQL
 - **Atomic Transactions** for complex operations
